@@ -44,7 +44,7 @@ We build slopbonk: a tool that finds these accounts among the people commenting 
   Not deciding leaves an account in the queue.
 - **Reviewer access**: organisation owners, plus teams or users the organisation chooses.
 - **Configuration** per organisation: which repositories and discussion categories to watch, who counts as exempt, thresholds, and adjustments to the rules.
-- **A shared signal**, optional for each organisation: "blocked by N other organisations using slopbonk", shown to reviewers.
+- **A shared signal**: "blocked by N other organisations using slopbonk", shown to reviewers.
 
 Review comes first. Automatic hiding or blocking may come later, only above thresholds whose precision has been measured.
 

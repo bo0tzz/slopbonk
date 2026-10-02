@@ -45,7 +45,7 @@ There's no sessions table (ADR-0002).
 
 ### Retention
 
-The initial values below are meant to be revisited once the system is running.
+These are initial values.
 
 - **History comments** (fetched from outside tenants' repositories) for accounts with no open or blocked case in any tenant are deleted 30 days after their last evaluation.
 - **Evaluations** (with their signal values) for accounts with no case decision are deleted after 90 days. That's long enough for 30-day backtests and shadow-rule measurement.

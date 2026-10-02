@@ -90,4 +90,4 @@ An account is evaluated when it first comments in an installed repository, and r
 - Someone removed from a reviewer team keeps access until their cookie expires, about an hour later.
 - A tenant's installation token sometimes pays for fetches whose results other tenants also use.
 - Storing public data once and sharing it across tenants means the database holds data about accounts that no single tenant's maintainers have seen. Retention rules have to account for that.
-- The re-check schedule is based on 23 accounts; revisit it once the system's own data shows when accounts first cross the review threshold.
+- The re-check schedule is based on only 23 accounts.

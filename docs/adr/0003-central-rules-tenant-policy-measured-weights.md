@@ -103,7 +103,7 @@ Tenants can't define new rules or change rule parameters. Any change to their se
 
 ## Considered options
 
-- **Tenants define their own rules** (a rule language or config files). Flexible, but easy to get wrong, results can't be compared between tenants, and labels from differently-configured tenants become hard to pool. Rejected; may be revisited for simple keyword or link rules.
+- **Tenants define their own rules** (a rule language or config files). Flexible, but easy to get wrong, results can't be compared between tenants, and labels from differently-configured tenants become hard to pool. Rejected, though simple keyword or link rules would avoid most of these problems.
 - **Central rules with no tenant control.** Simple, but thresholds and exemptions really do differ between communities. Rejected.
 - **An LLM classifier as the main method.** Judges text rather than behaviour, and AI-text detection is unreliable and biased. Rejected as the main method.
 - **Weights from each rule's own precision** (SmokeDetector's approach). Easy, but double-counts rules that fire on the same accounts. Acceptable only as a stopgap before there are enough labels to fit weights.
