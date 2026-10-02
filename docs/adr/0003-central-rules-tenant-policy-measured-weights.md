@@ -93,7 +93,7 @@ Tenants can't define new rules or change rule parameters. Any change to their se
 - **GitHub suspensions are not labels**, since accounts get suspended for many unrelated reasons. They're tracked as a reported figure (how many blocked accounts GitHub later suspended), and an unflagged account that gets suspended after commenting in an installed repository is shown to a human for review.
 - **Precision per rule** is reported with a confidence interval (Wilson score), so a rule doesn't look perfect on three data points.
 - **Audit sampling** puts a small random sample of below-threshold accounts in the review queue, marked as audits, so the miss rate can be estimated without bias.
-- **Shadow mode**: a new or changed rule runs and its results are recorded without affecting scores until it has enough labels to judge.
+- **Shadow mode**: a new or changed rule is evaluated alongside the active ones without affecting scores, until it has enough labels to judge.
 - **Automatic actions** can only be switched on for a threshold whose measured precision clears a high bar, on enough labels.
 
 ### Tuning
