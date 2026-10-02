@@ -24,13 +24,13 @@ Detection needs, per account:
 During validation, a candidate detection rule was tested: at least 3 distinct repositories within 24 hours with at least half of comments in Q&A categories, or at least 10 new repositories within 30 days with less than half of comments in organisations the account had posted in before. Of 23 farmers who first commented in Immich at least a week before the validation run, it would have fired on the history visible at:
 
 | time after first Immich comment | caught |
-|---|---|
-| immediately | 16 |
-| +1h | 18 |
-| +6h | 18 |
-| +24h | 19 |
-| +3 days | 21 |
-| +7 days | 21 |
+| ------------------------------- | ------ |
+| immediately                     | 16     |
+| +1h                             | 18     |
+| +6h                             | 18     |
+| +24h                            | 19     |
+| +3 days                         | 21     |
+| +7 days                         | 21     |
 
 ## Decision
 

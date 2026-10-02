@@ -42,6 +42,7 @@ We build slopbonk: a tool that finds these accounts among the people commenting 
   - **report**: open GitHub's report form for the account, with a summary of the evidence ready to copy in.
 
   Not deciding leaves an account in the queue.
+
 - **Reviewer access**: organisation owners, plus teams or users the organisation chooses.
 - **Configuration** per organisation: which repositories and discussion categories to watch, who counts as exempt, thresholds, and adjustments to the rules.
 - **A shared signal**: "blocked by N other organisations using slopbonk", shown to reviewers.

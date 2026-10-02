@@ -20,13 +20,13 @@ Method:
 
 Signals, as medians with p25–p75 in brackets. "High-volume humans" are the 39 human accounts labelled from the high signal bands, so their peak values are high by selection. "Everyone else" is the remaining accounts with at least 5 outward comments.
 
-| signal | farmers (43) | high-volume humans (39) | everyone else (611) |
-|---|---|---|---|
-| peak distinct repositories in any 24h | 11 (4–24) | 4 (4–6) | 2 (1–2) |
-| share of comments in answerable (Q&A) categories | 0.77 (0.53–0.97) | 0.10 (0.04–0.17) | 0.03 (0.00–0.11) |
-| share of comments in an organisation posted in before, excluding GitHub's Community forum | 0.33 (0.16–0.62) | 0.91 (0.84–0.96) | 0.62 (0.42–0.79) |
-| most new repositories in any 30 days | 20 (6–57) | 8 (5–13) | 2 (1–4) |
-| days with ≥3 repositories in the last 90 | 2 (1–5) | 1 (0–4) | 0 (0–0) |
+| signal                                                                                    | farmers (43)     | high-volume humans (39) | everyone else (611) |
+| ----------------------------------------------------------------------------------------- | ---------------- | ----------------------- | ------------------- |
+| peak distinct repositories in any 24h                                                     | 11 (4–24)        | 4 (4–6)                 | 2 (1–2)             |
+| share of comments in answerable (Q&A) categories                                          | 0.77 (0.53–0.97) | 0.10 (0.04–0.17)        | 0.03 (0.00–0.11)    |
+| share of comments in an organisation posted in before, excluding GitHub's Community forum | 0.33 (0.16–0.62) | 0.91 (0.84–0.96)        | 0.62 (0.42–0.79)    |
+| most new repositories in any 30 days                                                      | 20 (6–57)        | 8 (5–13)                | 2 (1–4)             |
+| days with ≥3 repositories in the last 90                                                  | 2 (1–5)          | 1 (0–4)                 | 0 (0–0)             |
 
 Findings:
 
@@ -38,11 +38,11 @@ Findings:
 
 Rules:
 
-| rule | fires | farmers caught (of 43) | others |
-|---|---|---|---|
-| peak ≥5 | 59 | 30 (70%) | 19 human maintainers, 10 agent/promotion accounts |
-| peak ≥3 and Q&A share ≥0.5 | 36 | 35 (81%) | 1 human |
-| … or (new repositories in 30 days ≥10 and returning share <0.5) | 41 | 37 (86%) | 1 human, 1 blocked PR agent account |
+| rule                                                            | fires | farmers caught (of 43) | others                                            |
+| --------------------------------------------------------------- | ----- | ---------------------- | ------------------------------------------------- |
+| peak ≥5                                                         | 59    | 30 (70%)               | 19 human maintainers, 10 agent/promotion accounts |
+| peak ≥3 and Q&A share ≥0.5                                      | 36    | 35 (81%)               | 1 human                                           |
+| … or (new repositories in 30 days ≥10 and returning share <0.5) | 41    | 37 (86%)               | 1 human, 1 blocked PR agent account               |
 
 - The one human was a maintainer answering in their own organisation's repositories. The "own repository" check only matched the user's personal account; history comments carry `authorAssociation`, so comments where the author is a member of the repository's organisation can be excluded.
 - Remaining misses: accounts mixing PR-agent comments and answers that keep returning to the same organisations, and brand-new accounts with one or two comments, where behaviour can't be judged yet.
