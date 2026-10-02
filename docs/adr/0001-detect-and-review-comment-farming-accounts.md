@@ -66,7 +66,7 @@ The first target is answer farmers. Issue/PR agent accounts and cross-posted pro
 ## Consequences
 
 - Maintainers review accounts instead of hunting for them; time per account drops to reading one evidence page.
-- Running it means holding GitHub users' data for many organisations, with the privacy obligations that brings (data model and retention, cross-tenant signal: later ADRs).
-- Detection quality depends on the rules, which need ongoing measurement and tuning (rules and scoring ADR).
+- Running it means holding GitHub users' data for many organisations, with the privacy obligations that brings, especially for data shared between organisations.
+- Detection quality depends on the rules, which need ongoing measurement and tuning.
 - Accounts with very little history (a comment or two) can't be judged on behaviour yet. Some farmers will be missed until they post more.
 - Offering it to other organisations means operating a service, with support and abuse-handling responsibilities of its own.
