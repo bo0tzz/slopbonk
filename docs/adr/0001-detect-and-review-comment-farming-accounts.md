@@ -39,7 +39,7 @@ We build slopbonk: a tool that finds these accounts among the people commenting 
 - **Actions**:
   - **block**: block the account from the organisation, optionally also hiding or deleting its comments there;
   - **dismiss**: not spam, for this organisation;
-  - **report**: a prefilled report to GitHub.
+  - **report**: open GitHub's report form for the account, with a summary of the evidence ready to copy in.
 
   Not deciding leaves an account in the queue.
 - **Reviewer access**: organisation owners, plus teams or users the organisation chooses.
