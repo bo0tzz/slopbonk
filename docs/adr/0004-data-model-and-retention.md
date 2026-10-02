@@ -6,7 +6,7 @@
 ## Context
 
 - ADR-0002 has ingest storing public GitHub data once for all tenants, policy working only on the database, and act carrying out decisions from an outbox.
-- ADR-0003 needs every evaluation's signal values and rule results stored, so rules can be backtested and weights fitted, and labels taken from maintainers' decisions.
+- ADR-0003 needs every evaluation's signal values stored, so rules can be backtested and weights fitted, and labels taken from maintainers' decisions.
 - Spam accounts delete their comments, and GitHub suspends accounts, after which their data disappears from the API. Evidence that's only linked to can vanish.
 - GDPR's storage limitation and data minimisation principles apply, and people can ask for their data to be deleted. Most accounts we fetch are ordinary people who will never be flagged.
 - GitHub's Acceptable Use Policies require personal data collected from GitHub to be reasonably secured, and removal requests answered promptly.
