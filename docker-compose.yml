@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: slopbonk
+      POSTGRES_PASSWORD: slopbonk
+      POSTGRES_DB: slopbonk
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres:/var/lib/postgresql
+
+volumes:
+  postgres:
