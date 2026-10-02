@@ -13,12 +13,12 @@
 
 ## Decision
 
-- **Language and runtime**: TypeScript on Node 24, the current Active LTS.
+- **Language and runtime**: TypeScript on Node 26, which becomes the Active LTS line on 2026-10-28.
 - **Database**: Postgres, accessed with Kysely, with migrations in the repository.
 - **GitHub**: Octokit (`@octokit/app` for the App, webhooks and installation tokens, with GraphQL pagination and throttling plugins).
-- **Dashboard**: SvelteKit with the Node adapter, using `@immich/ui` for components.
+- **Dashboard**: SvelteKit 2 with the Node adapter, using `@immich/ui` for components. SvelteKit 3 is out, but `@immich/ui` doesn't support it yet.
 - **Queue**: [pg-boss](https://github.com/timgit/pg-boss), stored in the same Postgres database, with workers running inside the application process.
-- **Deployment**: one container image. A single Node entry point starts the queue workers, serves the webhook endpoint and mounts the SvelteKit dashboard. Ingest, policy and act (ADR-0002) are separate modules and queues within it. pg-boss claims jobs with `SKIP LOCKED`, so several replicas can run side by side.
+- **Deployment**: one container image. The SvelteKit app is the single entry point: it serves the dashboard and the webhook endpoint, and starts the queue workers from its server `init` hook. Ingest, policy and act (ADR-0002) are separate modules and queues within it. pg-boss claims jobs with `SKIP LOCKED`, so several replicas can run side by side.
 - **Configuration**:
   - Secrets and connection details (database URL, the App's private key, webhook secret, OAuth client secret, cookie signing key) come from environment variables.
   - Operational settings are named constants in one module. Changing them is a reviewed code change, like a rule change, and every deployment runs with the same values.
