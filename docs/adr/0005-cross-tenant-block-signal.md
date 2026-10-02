@@ -1,6 +1,6 @@
 # 5. A cross-tenant block count that informs reviewers
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-02
 
 ## Context

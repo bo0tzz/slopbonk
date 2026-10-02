@@ -1,6 +1,6 @@
 # 3. Central, versioned rules; tenants set policy around them; weights come from measured performance
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-02
 
 ## Context

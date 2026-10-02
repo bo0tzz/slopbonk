@@ -1,6 +1,6 @@
 # 4. Data model: shared public data, per-tenant decisions, stored signal values, and bounded retention
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-02
 
 ## Context

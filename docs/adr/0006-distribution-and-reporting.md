@@ -1,6 +1,6 @@
 # 6. Install by link, no Marketplace listing yet; reporting to GitHub stays manual
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-02
 
 ## Context

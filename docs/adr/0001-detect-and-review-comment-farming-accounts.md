@@ -1,6 +1,6 @@
 # 1. Detect comment-farming accounts and put them in front of maintainers for review
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-02
 
 ## Context
