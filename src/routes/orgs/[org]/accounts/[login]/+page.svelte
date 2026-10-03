@@ -67,7 +67,7 @@
 		{/if}
 	</header>
 
-	<Panel title="Why it's flagged">
+	<Panel>
 		<div class="flex flex-wrap items-center gap-6">
 			<div>
 				<div class="text-3xl leading-tight font-bold tabular-nums">
