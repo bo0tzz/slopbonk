@@ -50,10 +50,11 @@
 					alt=""
 					class="size-8 rounded-full"
 				/>
-				<div>
+				<div class="w-44 min-w-0">
 					<a
 						href={resolve('/orgs/[org]/accounts/[login]', { org: data.org, login: entry.login })}
-						class="font-semibold after:absolute after:inset-0"
+						class="block truncate font-semibold after:absolute after:inset-0"
+						title={entry.login}
 					>
 						{entry.login}
 					</a>
