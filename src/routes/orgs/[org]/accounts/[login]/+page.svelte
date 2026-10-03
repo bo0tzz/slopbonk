@@ -88,19 +88,20 @@
 
 	<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
 		<Stack gap={6} class="min-w-0">
-			<Panel
-				title={`In ${account.org}`}
-				collapsedNote={`${account.commentsHere.length} comment${account.commentsHere.length === 1 ? '' : 's'}`}
-			>
-				<Stack gap={3}>
+			<Panel title={`In ${account.org}`}>
+				<Stack gap={2}>
 					{#each account.commentsHere as comment (comment.createdAt.getTime())}
-						<div class="rounded-lg bg-subtle p-3">
-							<Text size="small" color="muted">
-								<ExternalLink href={comment.url}>{comment.repository}</ExternalLink>
-								{#if comment.category}· {comment.category}{/if} · {when(comment.createdAt)}
-							</Text>
+						<details class="group rounded-lg bg-subtle p-3">
+							<summary class="cursor-pointer list-none">
+								<Text size="small" color="muted">
+									<span class="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
+									<ExternalLink href={comment.url}>{comment.repository}</ExternalLink>
+									{#if comment.category}· {comment.category}{/if} · {when(comment.createdAt)}
+								</Text>
+								<Text class="mt-1 truncate group-open:hidden">{comment.body}</Text>
+							</summary>
 							<Text class="mt-1 whitespace-pre-line">{comment.body}</Text>
-						</div>
+						</details>
 					{/each}
 				</Stack>
 			</Panel>
