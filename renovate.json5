@@ -1,0 +1,67 @@
+{
+	$schema: 'https://docs.renovatebot.com/renovate-schema.json',
+	// Every dependency bump is a fix, so it cuts a release and deployed images keep up.
+	extends: ['config:recommended', ':semanticCommits', ':semanticCommitTypeAll(fix)'],
+	pinDigests: true,
+	rebaseWhen: 'conflicted',
+	packageRules: [
+		{
+			description: 'Svelte ecosystem; @immich/ui tracks Svelte versions',
+			groupName: 'svelte',
+			matchPackageNames: [
+				'svelte',
+				'svelte-check',
+				'/^@sveltejs//',
+				'prettier-plugin-svelte',
+				'eslint-plugin-svelte',
+				'@immich/ui'
+			]
+		},
+		{
+			description: '@immich/ui does not support SvelteKit 3 yet',
+			matchPackageNames: ['@sveltejs/kit'],
+			allowedVersions: '<3'
+		},
+		{
+			description: 'SvelteKit 2 imports the named parse and serialize exports that cookie 2 removed; matches the override in pnpm-workspace.yaml',
+			matchPackageNames: ['cookie'],
+			allowedVersions: '<2'
+		},
+		{
+			groupName: 'eslint',
+			matchPackageNames: [
+				'eslint',
+				'@eslint/js',
+				'/^eslint-config-/',
+				'/^eslint-plugin-/',
+				'typescript-eslint'
+			]
+		},
+		{
+			groupName: 'vitest',
+			matchPackageNames: ['vitest', '/^@vitest//']
+		},
+		{
+			groupName: 'octokit',
+			matchPackageNames: ['/^@octokit//']
+		},
+		{
+			description: 'The image runs the same Node as development',
+			groupName: 'node',
+			matchDepNames: ['node'],
+			matchManagers: ['mise', 'dockerfile']
+		},
+		{
+			matchManagers: ['mise'],
+			semanticCommitScope: 'mise',
+			commitMessageTopic: 'tool {{depName}}'
+		},
+		{ matchUpdateTypes: ['major'], labels: ['type/major'] },
+		{ matchUpdateTypes: ['minor'], labels: ['type/minor'] },
+		{ matchUpdateTypes: ['patch'], labels: ['type/patch'] },
+		{ matchUpdateTypes: ['digest'], labels: ['type/digest'] },
+		{ matchManagers: ['github-actions'], addLabels: ['renovate/github-action'] },
+		{ matchManagers: ['dockerfile'], addLabels: ['renovate/container'] },
+		{ matchManagers: ['mise'], addLabels: ['renovate/mise'] }
+	]
+}
