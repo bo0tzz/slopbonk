@@ -76,7 +76,20 @@ export async function startQueue(
 	await boss.start();
 
 	for (const queue of queues) {
-		await boss.createQueue(queue.name, queue.options);
+		const existing = await boss.getQueue(queue.name);
+		if (!existing) {
+			await boss.createQueue(queue.name, queue.options);
+			continue;
+		}
+		const { policy = 'standard', ...options } = queue.options;
+		if (existing.policy !== policy) {
+			throw new Error(
+				`Queue ${queue.name} has policy ${existing.policy}, not ${policy}; it needs migrating.`
+			);
+		}
+		if (Object.keys(options).length > 0) {
+			await boss.updateQueue(queue.name, options);
+		}
 	}
 	const jobQueue = new JobQueue(boss);
 	for (const { queue, handle } of createWorkers(jobQueue)) {

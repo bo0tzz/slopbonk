@@ -75,7 +75,3 @@ export async function stopServices(): Promise<void> {
 		await stopping.db.destroy();
 	}
 }
-
-// Effective once the dev server runs server code through Vite's module runner (SvelteKit 3);
-// until then, restart the dev server after server-side changes.
-import.meta.hot?.dispose(stopServices);

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { PgBoss } from 'pg-boss';
 import { createTestDatabase } from '../testing/database';
 import { defineQueue, startQueue, worker, type JobQueue } from '.';
 
@@ -82,4 +83,14 @@ describe('job queue', () => {
 		expect(attempts).toHaveLength(2);
 		expect(attempts[0]).not.toBe(attempts[1]);
 	}, 15_000);
+
+	it('updates the options of a queue that already exists', async () => {
+		const retried = defineQueue<{ value: string }>('test.deferring', { retryLimit: 4 });
+		const queue = await startQueue(url, [retried], () => [], { deferUntil: () => null });
+		started.push(queue);
+		const boss = new PgBoss(url);
+		await boss.start();
+		expect((await boss.getQueue('test.deferring'))?.retryLimit).toBe(4);
+		await boss.stop({ graceful: true });
+	});
 });
