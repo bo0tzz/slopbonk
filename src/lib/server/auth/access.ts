@@ -9,7 +9,6 @@ export interface ReviewableInstallation {
 	accountType: AccountType;
 }
 
-/** The active installation on this organisation, if the reviewer may review it. */
 export async function installationForReviewer(
 	db: Db,
 	reviewer: Reviewer | null,

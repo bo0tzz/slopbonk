@@ -17,7 +17,6 @@ import { repositoryRecord, storeComment, storeRepository, storeThread, storeUser
 
 const THREAD_KINDS: BackfillPage['kind'][] = ['discussion', 'issue', 'pull_request'];
 
-/** Queues the first page of every kind of thread in each of the installation's repositories. */
 export async function startBackfill(
 	db: Db,
 	queue: JobSender,
@@ -48,12 +47,7 @@ export async function startBackfill(
 	return queued;
 }
 
-/**
- * Stores one page of recently updated threads with the comments they include from inside the
- * backfill window, and queues an evaluation for each account that posted them, as if they had
- * arrived by webhook. Queues the next page while threads are still inside the window, and
- * follow-ups for comments the page didn't include.
- */
+/** Each account whose comments it stores is evaluated as if the comments had arrived by webhook. */
 export async function backfillPage(
 	db: Db,
 	queue: JobSender,

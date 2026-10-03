@@ -151,7 +151,6 @@ export async function listQueue(
 	});
 }
 
-/** The account to show after deciding on `afterCaseId`: the next one in the review queue. */
 export async function nextToReview(
 	db: Db,
 	installationId: number,

@@ -29,7 +29,6 @@ export const fetchHistoryQueue = defineQueue<AccountInInstallation>(
 	byInstallation
 );
 
-/** One queued evaluation per account and installation at a time; repeats are dropped. */
 export const evaluateQueue = defineQueue<AccountInInstallation>('policy.evaluate', {
 	policy: 'stately',
 	...LOCAL_RETRIES
@@ -41,7 +40,6 @@ export interface BackfillJob {
 	repositoryIds?: number[];
 }
 
-/** Lists the installation's repositories and queues the first page of each kind of thread. */
 export const backfillQueue = defineQueue<BackfillJob>(
 	'ingest.backfill',
 	{ policy: 'stately', ...GITHUB_RETRIES },
@@ -66,7 +64,6 @@ export function backfillPageKey({
 	return `${installationId}:${repository.id}:${kind}:${cursor ?? 'first'}`;
 }
 
-/** One page of a repository's recently updated threads; queues the next page itself. */
 export const backfillPageQueue = defineQueue<BackfillPage>(
 	'ingest.backfill-page',
 	{ policy: 'stately', ...GITHUB_RETRIES },
@@ -105,10 +102,8 @@ export interface OutboxItem {
 
 export const OUTBOX_RETRY_LIMIT = GITHUB_RETRIES.retryLimit;
 
-/** Carries out one outbox item against GitHub; retried with backoff before the item is marked failed. */
 export const outboxQueue = defineQueue<OutboxItem>('act.outbox', GITHUB_RETRIES, byInstallation);
 
-/** Applies the retention rules (ADR-0004); scheduled daily. */
 export const retentionQueue = defineQueue<Record<string, never>>('retention.cleanup', {
 	policy: 'stately',
 	...LOCAL_RETRIES

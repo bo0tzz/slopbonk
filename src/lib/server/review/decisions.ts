@@ -11,7 +11,6 @@ export interface DecisionInput {
 	/** The reviewer; their account row is restored if retention removed it since they signed in. */
 	actor: { id: number; login: string };
 	action: ReviewAction;
-	/** With a block, also hide the account's comments in the organisation's repositories. */
 	hideComments?: boolean;
 	reason?: string;
 	/** The evaluation the reviewer was looking at; defaults to the account's latest. */

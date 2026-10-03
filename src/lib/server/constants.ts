@@ -13,7 +13,6 @@ export const INSTALL_BACKFILL_MS = 30 * DAY;
 /** A stored history younger than this satisfies a fetch request without calling GitHub. */
 export const HISTORY_FRESHNESS_MS = 15 * 60 * 1000;
 
-/** Retention (ADR-0004). */
 export const RETENTION = {
 	/** History comments of accounts with no open or blocked case, after their last evaluation. */
 	unflaggedHistoryMs: 30 * DAY,

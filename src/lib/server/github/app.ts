@@ -13,7 +13,6 @@ export function createApp(config: GithubAppConfig): App {
 
 const exhaustedUntil = new Map<string, number>();
 
-/** An installation's Octokit that throws RateLimitedError instead of waiting for a rate limit. */
 export async function installationOctokit(app: App, installationId: number): Promise<Octokit> {
 	const octokit = await app.getInstallationOctokit(installationId);
 	failFastOnRateLimit(octokit, String(installationId));

@@ -9,7 +9,6 @@ export interface ReviewableInstallation {
 	toReview: number;
 }
 
-/** The given installations that are still active, with how many accounts await review in each. */
 export async function reviewableInstallations(
 	db: Db,
 	installationIds: number[]

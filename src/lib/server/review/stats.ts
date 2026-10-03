@@ -12,7 +12,6 @@ export interface Stat {
 
 export const MAX_SCORE = RULESET.rules.reduce((sum, rule) => sum + rule.weight, 0);
 
-/** The ruleset's signals, in rule order. */
 export function stats(values: Partial<Record<SignalName, number>>): Stat[] {
 	const fired = new Set(
 		score(

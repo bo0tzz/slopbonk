@@ -15,7 +15,7 @@ export interface Ruleset {
 
 /**
  * Starting ruleset: "any three of four". Validated on 45 farmers and ~1,000 other commenters
- * (37 caught, no false positives); see ADR-0003 for the method.
+ * (39 caught, no false positives); see ADR-0003 for the method.
  */
 export const RULESET: Ruleset = {
 	version: '1',

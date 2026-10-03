@@ -132,7 +132,6 @@ export interface SignalValue {
 	value: number;
 }
 
-/** The signals the rules use, computed from an account's stored comments. */
 export function computeSignals(userId: number, comments: ActivityComment[]): SignalValue[] {
 	const outward = outwardComments(userId, comments);
 	return [
