@@ -1,9 +1,10 @@
 import type { Db } from '../db';
 import type { GithubClient } from '../github/client';
 import { worker, type JobSender } from '../queue';
-import { backfillPage, startBackfill } from './backfill';
+import { backfillComments, backfillPage, startBackfill } from './backfill';
 import { fetchHistory } from './history';
 import {
+	backfillCommentsQueue,
 	backfillPageQueue,
 	backfillQueue,
 	evaluateQueue,
@@ -33,5 +34,11 @@ export function backfillWorker({ db, queue, clientFor }: Deps) {
 export function backfillPageWorker({ db, queue, clientFor }: Deps) {
 	return worker(backfillPageQueue, async ({ data }) => {
 		await backfillPage(db, queue, await clientFor(data.installationId), data);
+	});
+}
+
+export function backfillCommentsWorker({ db, queue, clientFor }: Deps) {
+	return worker(backfillCommentsQueue, async ({ data }) => {
+		await backfillComments(db, queue, await clientFor(data.installationId), data);
 	});
 }

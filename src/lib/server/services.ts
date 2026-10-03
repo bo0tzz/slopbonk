@@ -12,7 +12,12 @@ import {
 	type GithubAuth,
 	type GithubClient
 } from './github/client';
-import { backfillPageWorker, backfillWorker, fetchHistoryWorker } from './ingest/workers';
+import {
+	backfillCommentsWorker,
+	backfillPageWorker,
+	backfillWorker,
+	fetchHistoryWorker
+} from './ingest/workers';
 import { queues } from './jobs';
 import { evaluateWorker } from './policy/workers';
 import { startQueue, type JobQueue } from './queue';
@@ -40,6 +45,7 @@ export async function startServices(): Promise<Services> {
 		fetchHistoryWorker({ db, queue, clientFor }),
 		backfillWorker({ db, queue, clientFor }),
 		backfillPageWorker({ db, queue, clientFor }),
+		backfillCommentsWorker({ db, queue, clientFor }),
 		evaluateWorker({ db, queue }),
 		outboxWorker({ db, actionsFor })
 	]);

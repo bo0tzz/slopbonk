@@ -55,6 +55,30 @@ export const backfillPageQueue = defineQueue<BackfillPage>('ingest.backfill-page
 	retryBackoff: true
 });
 
+export interface BackfillComments {
+	installationId: number;
+	thread: { id: string; kind: BackfillPage['kind'] };
+	/** Set to page through this discussion comment's replies instead of the thread's comments. */
+	commentId: string | null;
+	cursor: string | null;
+	since: string;
+}
+
+export function backfillCommentsKey({
+	installationId,
+	thread,
+	commentId,
+	cursor
+}: BackfillComments): string {
+	return `${installationId}:${commentId ?? thread.id}:${cursor ?? 'first'}`;
+}
+
+/** Comments a thread page didn't include: older ones, and discussion replies. */
+export const backfillCommentsQueue = defineQueue<BackfillComments>('ingest.backfill-comments', {
+	policy: 'stately',
+	retryBackoff: true
+});
+
 export interface OutboxItem {
 	outboxId: number;
 }
@@ -72,5 +96,6 @@ export const queues: QueueDefinition<object>[] = [
 	evaluateQueue,
 	backfillQueue,
 	backfillPageQueue,
+	backfillCommentsQueue,
 	outboxQueue
 ];

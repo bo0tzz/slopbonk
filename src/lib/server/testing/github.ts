@@ -11,6 +11,7 @@ export function fakeGithubClient(methods: Partial<GithubClient>): GithubClient {
 		issueComments: missing('issueComments'),
 		installationRepositories: missing('installationRepositories'),
 		recentThreads: missing('recentThreads'),
+		olderComments: missing('olderComments'),
 		...methods
 	};
 }

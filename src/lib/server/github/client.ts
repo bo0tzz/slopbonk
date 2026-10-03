@@ -70,12 +70,22 @@ export interface RecentComment {
 	body: string;
 	authorAssociation: string;
 	author: { __typename: string; login: string; id?: string; databaseId?: number } | null;
+	/** Top-level discussion comments only. */
+	replyCount?: number;
+}
+
+/** Comments newest first; `cursor` continues with older ones while `hasOlder`. */
+export interface CommentPage {
+	comments: RecentComment[];
+	cursor: string | null;
+	hasOlder: boolean;
 }
 
 export interface RecentThread extends ThreadNode {
 	updatedAt: string;
 	category?: { name: string; isAnswerable: boolean };
-	comments: RecentComment[];
+	/** The latest 100 top-level comments. */
+	comments: CommentPage;
 }
 
 /** A repository's threads, most recently updated first; `cursor` fetches the next page. */
@@ -101,12 +111,13 @@ export interface GithubClient {
 	): Promise<HistoryPage<DiscussionCommentNode>>;
 	issueComments(login: string, cursor: string | null): Promise<HistoryPage<IssueCommentNode>>;
 	installationRepositories(): Promise<RepositoryNode[]>;
-	/** Each thread carries only its latest 100 top-level comments. */
 	recentThreads(
 		kind: RecentThreadKind,
 		repository: { owner: string; name: string },
 		cursor: string | null
 	): Promise<ThreadPage>;
+	/** Older top-level comments of a thread, or the replies to a discussion comment. */
+	olderComments(id: string, cursor: string | null): Promise<CommentPage>;
 }
 
 const ACCOUNT = 'login ... on User { databaseId } ... on Organization { databaseId }';
@@ -139,31 +150,66 @@ const ISSUE_COMMENTS = `query($login: String!, $cursor: String) {
 	}
 }`;
 
-const RECENT_THREAD_FIELDS: Record<RecentThreadKind, [connection: string, fields: string]> = {
-	discussion: ['discussions', 'category { name isAnswerable }'],
-	issue: ['issues', ''],
-	pull_request: ['pullRequests', '']
+const COMMENT_FIELDS =
+	'id createdAt lastEditedAt body authorAssociation author { __typename login ... on User { id databaseId } }';
+const DISCUSSION_COMMENT_FIELDS = `${COMMENT_FIELDS} isAnswer replies { totalCount }`;
+const REPLY_FIELDS = `${COMMENT_FIELDS} isAnswer`;
+const commentConnection = (fields: string) =>
+	`pageInfo { startCursor hasPreviousPage } nodes { ${fields} }`;
+
+const RECENT_THREAD_FIELDS: Record<
+	RecentThreadKind,
+	[connection: string, threadFields: string, commentFields: string]
+> = {
+	discussion: ['discussions', 'category { name isAnswerable }', DISCUSSION_COMMENT_FIELDS],
+	issue: ['issues', '', COMMENT_FIELDS],
+	pull_request: ['pullRequests', '', COMMENT_FIELDS]
 };
 
 function recentThreadsQuery(kind: RecentThreadKind): string {
-	const [connection, fields] = RECENT_THREAD_FIELDS[kind];
-	const answer = kind === 'discussion' ? 'isAnswer' : '';
+	const [connection, threadFields, commentFields] = RECENT_THREAD_FIELDS[kind];
 	return `query($owner: String!, $name: String!, $cursor: String) {
 	repository(owner: $owner, name: $name) {
 		${connection}(first: 25, after: $cursor, orderBy: { field: UPDATED_AT, direction: DESC }) {
 			pageInfo { endCursor hasNextPage }
 			nodes {
-				${THREAD} updatedAt ${fields}
-				comments(last: 100) {
-					nodes {
-						id createdAt lastEditedAt body authorAssociation ${answer}
-						author { __typename login ... on User { id databaseId } }
-					}
-				}
+				${THREAD} updatedAt ${threadFields}
+				comments(last: 100) { ${commentConnection(commentFields)} }
 			}
 		}
 	}
 }`;
+}
+
+const OLDER_COMMENTS = `query($id: ID!, $cursor: String) {
+	node(id: $id) {
+		... on Discussion {
+			discussionComments: comments(last: 100, before: $cursor) { ${commentConnection(DISCUSSION_COMMENT_FIELDS)} }
+		}
+		... on Issue {
+			issueComments: comments(last: 100, before: $cursor) { ${commentConnection(COMMENT_FIELDS)} }
+		}
+		... on PullRequest {
+			pullRequestComments: comments(last: 100, before: $cursor) { ${commentConnection(COMMENT_FIELDS)} }
+		}
+		... on DiscussionComment {
+			replies(last: 100, before: $cursor) { ${commentConnection(REPLY_FIELDS)} }
+		}
+	}
+}`;
+
+type RawComment = Omit<RecentComment, 'replyCount'> & { replies?: { totalCount: number } };
+
+function toCommentPage(connection: Connection<RawComment> | undefined): CommentPage {
+	const page = toPage(connection);
+	return {
+		comments: page.nodes.map(({ replies, ...comment }) => ({
+			...comment,
+			replyCount: replies?.totalCount
+		})),
+		cursor: page.cursor,
+		hasOlder: page.hasOlder
+	};
 }
 
 interface Connection<T> {
@@ -356,9 +402,7 @@ export async function installationClient(app: App, installationId: number): Prom
 			}
 		},
 		async recentThreads(kind, repository, cursor) {
-			type Node = Omit<RecentThread, 'comments'> & {
-				comments: { nodes: (RecentComment | null)[] };
-			};
+			type Node = Omit<RecentThread, 'comments'> & { comments: Connection<RawComment> };
 			const [connection] = RECENT_THREAD_FIELDS[kind];
 			const data = await graphqlAllowingPartial<{
 				repository: Record<
@@ -377,13 +421,28 @@ export async function installationClient(app: App, installationId: number): Prom
 			return {
 				threads: threads.nodes
 					.filter((node): node is Node => node !== null)
-					.map((node) => ({
-						...node,
-						comments: node.comments.nodes.filter((c): c is RecentComment => c !== null)
-					})),
+					.map((node) => ({ ...node, comments: toCommentPage(node.comments) })),
 				cursor: threads.pageInfo.endCursor,
 				hasMore: threads.pageInfo.hasNextPage
 			};
+		},
+		async olderComments(id, cursor) {
+			type Comments = Connection<RawComment>;
+			const data = await graphqlAllowingPartial<{
+				node: {
+					discussionComments?: Comments;
+					issueComments?: Comments;
+					pullRequestComments?: Comments;
+					replies?: Comments;
+				} | null;
+			}>(octokit, OLDER_COMMENTS, { id, cursor });
+			const node = data.node;
+			return toCommentPage(
+				node?.discussionComments ??
+					node?.issueComments ??
+					node?.pullRequestComments ??
+					node?.replies
+			);
 		}
 	};
 }
