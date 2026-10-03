@@ -88,7 +88,7 @@ describe('backfill', () => {
 	it('queues the first page of each kind of thread per repository', async () => {
 		const client = fakeGithubClient({ installationRepositories: async () => [repository] });
 
-		expect(await startBackfill(db, queue, client, 10, now)).toBe(3);
+		expect(await startBackfill(db, queue, client, { installationId: 10 }, now)).toBe(3);
 
 		expect(sent.map((job) => [job.queue, (job.data as BackfillPage).kind, job.key])).toEqual([
 			['ingest.backfill-page', 'discussion', '10:200:discussion:first'],
@@ -96,6 +96,19 @@ describe('backfill', () => {
 			['ingest.backfill-page', 'pull_request', '10:200:pull_request:first']
 		]);
 		expect(sent[0].data).toEqual(firstPage);
+	});
+
+	it('queues only the repositories asked for', async () => {
+		const added = { ...repository, databaseId: 201, id: 'R_201', name: 'added' };
+		const client = fakeGithubClient({ installationRepositories: async () => [repository, added] });
+
+		await startBackfill(db, queue, client, { installationId: 10, repositoryIds: [201] }, now);
+
+		expect(sent.map((job) => job.key)).toEqual([
+			'10:201:discussion:first',
+			'10:201:issue:first',
+			'10:201:pull_request:first'
+		]);
 	});
 
 	function clientReturning(page: ThreadPage) {

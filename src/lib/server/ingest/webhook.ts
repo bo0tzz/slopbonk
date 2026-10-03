@@ -31,6 +31,13 @@ export async function handleWebhookRequest(request: Request, deps: Deps): Promis
 		const job = { installationId: event.payload.installation.id };
 		await deps.queue.send(backfillQueue, job, { singletonKey: String(job.installationId) });
 	});
+	webhooks.on('installation_repositories.added', async (event) => {
+		const repositoryIds = event.payload.repositories_added.map((repository) => repository.id);
+		const job = { installationId: event.payload.installation.id, repositoryIds };
+		await deps.queue.send(backfillQueue, job, {
+			singletonKey: `${job.installationId}:${repositoryIds.join(',')}`
+		});
+	});
 	webhooks.on('installation.unsuspend', (event) =>
 		recordInstallation(deps.db, event.payload.installation)
 	);

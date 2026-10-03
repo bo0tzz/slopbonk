@@ -35,12 +35,14 @@ export const evaluateQueue = defineQueue<AccountInInstallation>('policy.evaluate
 	...LOCAL_RETRIES
 });
 
-export interface InstallationJob {
+export interface BackfillJob {
 	installationId: number;
+	/** Only these of the installation's repositories, e.g. ones just added to it; otherwise all. */
+	repositoryIds?: number[];
 }
 
 /** Lists the installation's repositories and queues the first page of each kind of thread. */
-export const backfillQueue = defineQueue<InstallationJob>(
+export const backfillQueue = defineQueue<BackfillJob>(
 	'ingest.backfill',
 	{ policy: 'stately', ...GITHUB_RETRIES },
 	byInstallation

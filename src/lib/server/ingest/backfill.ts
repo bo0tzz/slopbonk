@@ -9,6 +9,7 @@ import {
 	evaluateQueue,
 	jobKey,
 	type BackfillComments,
+	type BackfillJob,
 	type BackfillPage
 } from '../jobs';
 import type { JobSender } from '../queue';
@@ -21,14 +22,14 @@ export async function startBackfill(
 	db: Db,
 	queue: JobSender,
 	client: GithubClient,
-	installationId: number,
+	{ installationId, repositoryIds }: BackfillJob,
 	now = new Date()
 ): Promise<number> {
 	const since = new Date(now.getTime() - INSTALL_BACKFILL_MS).toISOString();
 	let queued = 0;
 	for (const repository of await client.installationRepositories()) {
 		const record = repositoryRecord(repository);
-		if (!record) {
+		if (!record || (repositoryIds && !repositoryIds.includes(record.id))) {
 			continue;
 		}
 		await storeRepository(db, record);

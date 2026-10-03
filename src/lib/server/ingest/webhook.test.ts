@@ -186,6 +186,24 @@ describe('webhook ingest', () => {
 		expect(sent).toEqual([]);
 	});
 
+	it('backfills repositories added to an installation', async () => {
+		const response = await deliver('installation_repositories', {
+			action: 'added',
+			installation: { id: 10, account: owner },
+			repository_selection: 'selected',
+			repositories_added: [{ id: 201, node_id: 'R_201', name: 'new', full_name: 'some-org/new' }],
+			repositories_removed: []
+		});
+		expect(response.status).toBe(202);
+		expect(sent).toEqual([
+			{
+				queue: 'ingest.backfill',
+				data: { installationId: 10, repositoryIds: [201] },
+				key: '10:201'
+			}
+		]);
+	});
+
 	it('marks an installation as uninstalled', async () => {
 		await deliver('installation', { action: 'deleted', installation: { id: 10, account: owner } });
 		const { uninstalled_at } = await db

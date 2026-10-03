@@ -27,7 +27,7 @@ export function fetchHistoryWorker({ db, queue, clientFor }: Deps) {
 
 export function backfillWorker({ db, queue, clientFor }: Deps) {
 	return worker(backfillQueue, async ({ data }) => {
-		await startBackfill(db, queue, await clientFor(data.installationId), data.installationId);
+		await startBackfill(db, queue, await clientFor(data.installationId), data);
 	});
 }
 
