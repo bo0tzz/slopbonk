@@ -48,7 +48,7 @@ export class JobQueue {
 export async function startQueue(
 	connectionString: string,
 	queues: QueueDefinition<object>[],
-	workers: Worker<object>[]
+	createWorkers: (queue: JobQueue) => Worker<object>[]
 ): Promise<JobQueue> {
 	const boss = new PgBoss(connectionString);
 	boss.on('error', (error) => console.error('Job queue error', error));
@@ -57,7 +57,8 @@ export async function startQueue(
 	for (const queue of queues) {
 		await boss.createQueue(queue.name, queue.options);
 	}
-	for (const { queue, handle } of workers) {
+	const jobQueue = new JobQueue(boss);
+	for (const { queue, handle } of createWorkers(jobQueue)) {
 		await boss.work<object>(queue.name, async (jobs) => {
 			for (const job of jobs) {
 				await handle(job);
@@ -65,5 +66,5 @@ export async function startQueue(
 		});
 	}
 
-	return new JobQueue(boss);
+	return jobQueue;
 }

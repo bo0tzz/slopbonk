@@ -2,6 +2,7 @@ import { Webhooks, type EmitterWebhookEvent } from '@octokit/webhooks';
 import type { Db } from '../db';
 import type { JobQueue } from '../queue';
 import { evaluateKey, evaluateQueue } from '../policy/queues';
+import { storeComment, storeRepository, storeThread } from './store';
 
 type Queue = Pick<JobQueue, 'send'>;
 
@@ -94,19 +95,13 @@ async function recordComment({ db, queue }: Deps, event: CommentEvent) {
 		.onConflict((oc) => oc.column('id').doUpdateSet({ login: author.login }))
 		.execute();
 
-	await db
-		.insertInto('repositories')
-		.values({
-			id: repository.id,
-			node_id: repository.node_id,
-			owner_id: owner.id,
-			owner_login: owner.login,
-			name: repository.name
-		})
-		.onConflict((oc) =>
-			oc.column('id').doUpdateSet({ owner_login: owner.login, name: repository.name })
-		)
-		.execute();
+	await storeRepository(db, {
+		id: repository.id,
+		node_id: repository.node_id,
+		owner_id: owner.id,
+		owner_login: owner.login,
+		name: repository.name
+	});
 
 	const thread =
 		event.name === 'discussion_comment'
@@ -128,25 +123,19 @@ async function recordComment({ db, queue }: Deps, event: CommentEvent) {
 					category_answerable: false,
 					created_at: event.payload.issue.created_at
 				};
-	await db
-		.insertInto('threads')
-		.values({ ...thread, repository_id: repository.id })
-		.onConflict((oc) => oc.column('id').doNothing())
-		.execute();
+	await storeThread(db, { ...thread, repository_id: repository.id });
 
-	await db
-		.insertInto('comments')
-		.values({
-			id: comment.node_id,
-			author_id: author.id,
-			thread_id: thread.id,
-			author_association: comment.author_association,
-			body: comment.body,
-			created_at: comment.created_at,
-			source: 'webhook'
-		})
-		.onConflict((oc) => oc.column('id').doNothing())
-		.execute();
+	await storeComment(db, {
+		id: comment.node_id,
+		author_id: author.id,
+		thread_id: thread.id,
+		author_association: comment.author_association,
+		is_answer: false,
+		body: comment.body,
+		created_at: comment.created_at,
+		edited_at: null,
+		source: 'webhook'
+	});
 
 	const job = { installationId, userId: author.id };
 	await queue.send(evaluateQueue, job, { singletonKey: evaluateKey(job) });

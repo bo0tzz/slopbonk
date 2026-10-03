@@ -1,11 +1,11 @@
 import { databaseUrl } from '../env';
 import { startQueue, type JobQueue } from '.';
-import { queues, workers } from './registry';
+import { createWorkers, queues } from './registry';
 
 let queue: JobQueue | undefined;
 
 export async function startJobQueue(): Promise<JobQueue> {
-	queue ??= await startQueue(databaseUrl(), queues, workers);
+	queue ??= await startQueue(databaseUrl(), queues, createWorkers);
 	return queue;
 }
 

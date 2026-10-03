@@ -22,16 +22,12 @@ describe('job queue', () => {
 	});
 
 	async function start() {
-		const queue = await startQueue(
-			url,
-			[echo, keyed],
-			[
-				worker(echo, async (job) => {
-					received.push(job.data.value);
-					notify();
-				})
-			]
-		);
+		const queue = await startQueue(url, [echo, keyed], () => [
+			worker(echo, async (job) => {
+				received.push(job.data.value);
+				notify();
+			})
+		]);
 		started.push(queue);
 		return queue;
 	}
