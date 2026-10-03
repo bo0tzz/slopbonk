@@ -11,9 +11,9 @@ export async function up(db: Kysely<any>): Promise<void> {
   $$;`.execute(db);
 	await sql`CREATE TABLE "github_users" (
   "id" bigint NOT NULL,
-  "node_id" text NOT NULL,
+  "node_id" text,
   "login" text NOT NULL,
-  "account_created_at" timestamp with time zone NOT NULL,
+  "account_created_at" timestamp with time zone,
   "name" text,
   "bio" text,
   "followers" integer,
@@ -23,11 +23,13 @@ export async function up(db: Kysely<any>): Promise<void> {
 );`.execute(db);
 	await sql`CREATE TABLE "installations" (
   "id" bigint NOT NULL,
-  "org_id" bigint NOT NULL,
-  "org_login" text NOT NULL,
+  "account_id" bigint NOT NULL,
+  "account_login" text NOT NULL,
+  "account_type" text NOT NULL,
   "config" jsonb NOT NULL DEFAULT '{}',
   "installed_at" timestamp with time zone NOT NULL DEFAULT now(),
   "uninstalled_at" timestamp with time zone,
+  CONSTRAINT "installations_account_type_check" CHECK (account_type IN ('Organization', 'User')),
   CONSTRAINT "installations_pkey" PRIMARY KEY ("id")
 );`.execute(db);
 	await sql`CREATE TABLE "cases" (
@@ -143,7 +145,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   CONSTRAINT "decisions_case_id_fkey" FOREIGN KEY ("case_id") REFERENCES "cases" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "decisions_actor_id_fkey" FOREIGN KEY ("actor_id") REFERENCES "github_users" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "decisions_evaluation_id_fkey" FOREIGN KEY ("evaluation_id") REFERENCES "evaluations" ("id") ON UPDATE NO ACTION ON DELETE SET NULL,
-  CONSTRAINT "decisions_action_check" CHECK (action IN ('block', 'dismiss', 'unblock', 'hide', 'delete')),
+  CONSTRAINT "decisions_action_check" CHECK (action IN ('block', 'dismiss')),
   CONSTRAINT "decisions_pkey" PRIMARY KEY ("id")
 );`.execute(db);
 	await sql`CREATE INDEX "decisions_case_id_idx" ON "decisions" ("case_id");`.execute(db);
@@ -156,8 +158,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   "decision_id" bigint NOT NULL,
   "installation_id" bigint NOT NULL,
   "action" text NOT NULL,
-  "target_user_id" bigint,
-  "target_comment_id" text,
+  "target_user_id" bigint NOT NULL,
   "status" text NOT NULL DEFAULT 'pending',
   "attempts" integer NOT NULL DEFAULT 0,
   "last_error" text,
@@ -165,9 +166,8 @@ export async function up(db: Kysely<any>): Promise<void> {
   "completed_at" timestamp with time zone,
   CONSTRAINT "outbox_decision_id_fkey" FOREIGN KEY ("decision_id") REFERENCES "decisions" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "outbox_installation_id_fkey" FOREIGN KEY ("installation_id") REFERENCES "installations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "outbox_single_target_check" CHECK ((target_user_id IS NULL) <> (target_comment_id IS NULL)),
   CONSTRAINT "outbox_status_check" CHECK (status IN ('pending', 'done', 'failed')),
-  CONSTRAINT "outbox_action_check" CHECK (action IN ('block_user', 'unblock_user', 'minimize_comment', 'delete_comment')),
+  CONSTRAINT "outbox_action_check" CHECK (action IN ('block_user')),
   CONSTRAINT "outbox_pkey" PRIMARY KEY ("id")
 );`.execute(db);
 	await sql`CREATE INDEX "outbox_pending_idx" ON "outbox" ("created_at") WHERE (status = 'pending');`.execute(

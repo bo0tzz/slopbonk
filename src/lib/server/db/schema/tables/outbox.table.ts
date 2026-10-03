@@ -11,19 +11,12 @@ import {
 import { DecisionTable } from './decision.table.js';
 import { InstallationTable } from './installation.table.js';
 
-export type OutboxAction = 'block_user' | 'unblock_user' | 'minimize_comment' | 'delete_comment';
+export type OutboxAction = 'block_user';
 export type OutboxStatus = 'pending' | 'done' | 'failed';
 
 @Table({ name: 'outbox' })
-@Check({
-	name: 'outbox_action_check',
-	expression: `action IN ('block_user', 'unblock_user', 'minimize_comment', 'delete_comment')`
-})
+@Check({ name: 'outbox_action_check', expression: `action IN ('block_user')` })
 @Check({ name: 'outbox_status_check', expression: `status IN ('pending', 'done', 'failed')` })
-@Check({
-	name: 'outbox_single_target_check',
-	expression: '(target_user_id IS NULL) <> (target_comment_id IS NULL)'
-})
 @Index({ name: 'outbox_pending_idx', columns: ['created_at'], where: `status = 'pending'` })
 export class OutboxTable {
 	@PrimaryColumn({ type: 'bigint', identity: true })
@@ -38,11 +31,8 @@ export class OutboxTable {
 	@Column({ type: 'text' })
 	action!: OutboxAction;
 
-	@Column({ type: 'bigint', nullable: true })
-	target_user_id!: number | null;
-
-	@Column({ type: 'text', nullable: true })
-	target_comment_id!: string | null;
+	@Column({ type: 'bigint' })
+	target_user_id!: number;
 
 	@Column({ type: 'text', default: 'pending' })
 	status!: Generated<OutboxStatus>;

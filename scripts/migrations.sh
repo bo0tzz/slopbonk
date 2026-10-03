@@ -7,6 +7,7 @@ command=$1
 name=${2:-}
 migrations=src/lib/server/db/migrations
 
+rm -rf .sql-tools
 tsc -p tsconfig.schema.json
 mkdir -p .sql-tools/migrations
 

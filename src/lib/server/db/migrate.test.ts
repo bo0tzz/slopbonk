@@ -74,41 +74,6 @@ describe('migrations', () => {
 		).rejects.toThrow(/foreign key/);
 	});
 
-	it('requires exactly one outbox target', async () => {
-		await db
-			.insertInto('installations')
-			.values({
-				id: 10,
-				account_id: 20,
-				account_login: 'org',
-				account_type: 'Organization',
-				config: '{}'
-			})
-			.execute();
-		const { id: caseId } = await db
-			.insertInto('cases')
-			.values({
-				installation_id: 10,
-				user_id: 1,
-				score: 1,
-				first_seen_at: new Date(),
-				last_seen_at: new Date()
-			})
-			.returning('id')
-			.executeTakeFirstOrThrow();
-		const { id: decisionId } = await db
-			.insertInto('decisions')
-			.values({ case_id: caseId, actor_id: 1, action: 'block' })
-			.returning('id')
-			.executeTakeFirstOrThrow();
-		await expect(
-			db
-				.insertInto('outbox')
-				.values({ decision_id: decisionId, installation_id: 10, action: 'block_user' })
-				.execute()
-		).rejects.toThrow(/check constraint/);
-	});
-
 	it('migrates down cleanly', async () => {
 		const { error } = await migrator(db).migrateTo(NO_MIGRATIONS);
 		expect(error).toBeUndefined();
