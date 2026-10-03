@@ -8,6 +8,7 @@ interface Deps {
 	db: Db;
 	queue: JobSender;
 	secret: string;
+	onInstallationsChanged(): void;
 }
 
 type CommentEvent = EmitterWebhookEvent<'discussion_comment.created' | 'issue_comment.created'>;
@@ -26,6 +27,15 @@ export async function handleWebhookRequest(request: Request, deps: Deps): Promis
 		return new Response('Invalid signature', { status: 401 });
 	}
 
+	webhooks.on(
+		[
+			'installation.created',
+			'installation.deleted',
+			'installation.suspend',
+			'installation.unsuspend'
+		],
+		() => deps.onInstallationsChanged()
+	);
 	webhooks.on('installation.created', async (event) => {
 		await recordInstallation(deps.db, event.payload.installation);
 		const job = { installationId: event.payload.installation.id };

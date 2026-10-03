@@ -58,6 +58,11 @@ function refreshOnce(auth: GithubAuth, refreshToken: string): Promise<UserTokens
 
 const cache = new Map<string, { identity: UserIdentity; until: number }>();
 
+/** Makes every reviewer's next request ask GitHub which installations they can access. */
+export function forgetIdentities() {
+	cache.clear();
+}
+
 async function identify(auth: GithubAuth, accessToken: string, now: number) {
 	const cached = cache.get(accessToken);
 	if (cached && cached.until > now) {

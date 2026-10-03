@@ -56,8 +56,14 @@ describe('webhook ingest', () => {
 		await drop?.();
 	});
 
+	let installationChanges = 0;
+	const onInstallationsChanged = () => {
+		installationChanges++;
+	};
+
 	beforeEach(() => {
 		sent = [];
+		installationChanges = 0;
 	});
 
 	async function deliver(event: string, payload: object, signWith = secret) {
@@ -72,13 +78,13 @@ describe('webhook ingest', () => {
 			},
 			body
 		});
-		return handleWebhookRequest(request, { db, queue, secret });
+		return handleWebhookRequest(request, { db, queue, secret, onInstallationsChanged });
 	}
 
 	it('rejects requests without GitHub headers', async () => {
 		const response = await handleWebhookRequest(
 			new Request('http://localhost', { method: 'POST', body: '{}' }),
-			{ db, queue, secret }
+			{ db, queue, secret, onInstallationsChanged }
 		);
 		expect(response.status).toBe(400);
 	});
@@ -108,6 +114,7 @@ describe('webhook ingest', () => {
 			uninstalled_at: null
 		});
 		expect(sent).toEqual([{ queue: 'ingest.backfill', data: { installationId: 10 }, key: '10' }]);
+		expect(installationChanges).toBe(1);
 	});
 
 	it('stores a discussion comment and queues an evaluation', async () => {
