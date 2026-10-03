@@ -25,6 +25,11 @@
 			allowedVersions: '<3'
 		},
 		{
+			description: 'adapter-node 6 needs SvelteKit 3',
+			matchPackageNames: ['@sveltejs/adapter-node'],
+			allowedVersions: '<6'
+		},
+		{
 			description: 'SvelteKit 2 imports the named parse and serialize exports that cookie 2 removed; matches the override in pnpm-workspace.yaml',
 			matchPackageNames: ['cookie'],
 			allowedVersions: '<2'
