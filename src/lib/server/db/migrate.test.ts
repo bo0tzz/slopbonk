@@ -1,25 +1,11 @@
-import { randomUUID } from 'node:crypto';
-import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { createTestDatabase } from '../testing/database';
 import { createDb, type Db } from '.';
 import { migrateToLatest, migrator } from './migrate';
 
-const adminUrl =
-	process.env.TEST_DATABASE_URL ?? 'postgres://slopbonk:slopbonk@localhost:5432/slopbonk';
-const dbName = `slopbonk_test_${randomUUID().replaceAll('-', '')}`;
-
-async function admin(query: string) {
-	const client = new pg.Client({ connectionString: adminUrl });
-	await client.connect();
-	try {
-		await client.query(query);
-	} finally {
-		await client.end();
-	}
-}
-
 describe('migrations', () => {
 	let db: Db;
+	let drop: () => Promise<void>;
 
 	async function tableNames() {
 		const tables = await db.introspection.getTables();
@@ -27,16 +13,15 @@ describe('migrations', () => {
 	}
 
 	beforeAll(async () => {
-		await admin(`CREATE DATABASE ${dbName}`);
-		const url = new URL(adminUrl);
-		url.pathname = `/${dbName}`;
-		db = createDb(url.toString());
+		const testDb = await createTestDatabase();
+		drop = testDb.drop;
+		db = createDb(testDb.url);
 		await migrateToLatest(db);
 	});
 
 	afterAll(async () => {
 		await db?.destroy();
-		await admin(`DROP DATABASE IF EXISTS ${dbName}`);
+		await drop?.();
 	});
 
 	it('creates the schema', async () => {
