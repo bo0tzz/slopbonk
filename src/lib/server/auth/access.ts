@@ -1,4 +1,5 @@
 import type { Db } from '../db';
+import { operatorIds } from '../env';
 import type { AccountType } from '../db/schema/tables/installation.table';
 import type { Reviewer } from './session';
 
@@ -32,4 +33,8 @@ export async function installationForReviewer(
 		login: installation.account_login,
 		accountType: installation.account_type
 	};
+}
+
+export function isOperator(reviewer: Reviewer | null): boolean {
+	return reviewer !== null && operatorIds().includes(reviewer.id);
 }

@@ -1,11 +1,12 @@
 import { getRequestEvent, query } from '$app/server';
+import { isOperator } from '$lib/server/auth/access';
 import { githubApp } from '$lib/server/env';
 import { reviewableInstallations } from '$lib/server/review/installations';
 import { getServices } from '$lib/server/services';
 
 export const currentReviewer = query(async () => {
 	const { reviewer } = getRequestEvent().locals;
-	return reviewer ? { login: reviewer.login } : null;
+	return reviewer ? { login: reviewer.login, operator: isOperator(reviewer) } : null;
 });
 
 export const reviewableOrgs = query(async () => {

@@ -6,6 +6,11 @@ import { defineQueue, startQueue, worker, type JobQueue } from '.';
 const echo = defineQueue<{ value: string }>('test.echo');
 const keyed = defineQueue<{ account: number }>('test.keyed', { policy: 'stately' });
 const deferring = defineQueue<{ value: string }>('test.deferring', { retryLimit: 0 });
+const failedJobs = defineQueue<object>('test.failed');
+const failing = defineQueue<{ value: string }>('test.failing', {
+	retryLimit: 0,
+	deadLetter: failedJobs.name
+});
 
 class NotYet extends Error {
 	constructor(readonly until: Date) {
@@ -33,11 +38,14 @@ describe('job queue', () => {
 	async function start() {
 		const queue = await startQueue(
 			url,
-			[echo, keyed, deferring],
+			[echo, keyed, deferring, failedJobs, failing],
 			() => [
 				worker(echo, async (job) => {
 					received.push(job.data.value);
 					notify();
+				}),
+				worker(failing, async () => {
+					throw new Error('broken on purpose');
 				}),
 				worker(deferring, async (job) => {
 					attempts.push(job.id);
@@ -93,4 +101,18 @@ describe('job queue', () => {
 		expect((await boss.getQueue('test.deferring'))?.retryLimit).toBe(4);
 		await boss.stop({ graceful: true });
 	});
+
+	it('keeps a job that ran out of retries in the dead letter queue, with its error', async () => {
+		const [queue] = started;
+		await queue.send(failing, { value: 'doomed' });
+		let dead: Awaited<ReturnType<typeof queue.list>> = [];
+		for (let i = 0; i < 50 && dead.length === 0; i++) {
+			await new Promise((resolve) => setTimeout(resolve, 200));
+			dead = await queue.list(failedJobs);
+		}
+		expect(dead).toHaveLength(1);
+		expect(dead[0]).toMatchObject({ sourceName: 'test.failing', data: { value: 'doomed' } });
+		const original = await queue.find(dead[0].sourceName!, dead[0].sourceId!);
+		expect(original?.output).toMatchObject({ message: 'broken on purpose' });
+	}, 15_000);
 });

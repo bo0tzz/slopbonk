@@ -13,6 +13,13 @@ export function createApp(config: GithubAppConfig): App {
 
 const exhaustedUntil = new Map<string, number>();
 
+/** Installations whose rate limit this process is waiting out, and until when. */
+export function rateLimitHolds(now = Date.now()): { installationId: number; until: Date }[] {
+	return [...exhaustedUntil]
+		.filter(([, until]) => until > now)
+		.map(([budget, until]) => ({ installationId: Number(budget), until: new Date(until) }));
+}
+
 export async function installationOctokit(app: App, installationId: number): Promise<Octokit> {
 	const octokit = await app.getInstallationOctokit(installationId);
 	failFastOnRateLimit(octokit, String(installationId));

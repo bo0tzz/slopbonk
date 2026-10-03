@@ -34,6 +34,7 @@ CI publishes the image to `ghcr.io/bo0tzz/slopbonk`: `latest` and `sha-<commit>`
 - `DATABASE_URL`
 - `ORIGIN`: the instance's public URL, as registered with the GitHub App
 - `GITHUB_APP_ID`, `GITHUB_APP_SLUG`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_WEBHOOK_SECRET`, `GITHUB_PRIVATE_KEY`
+- `OPERATOR_GITHUB_IDS`: comma-separated GitHub user ids of the people who may open the admin panel at `/admin`
 - `PUBLIC_CONTACT_EMAIL`: where people can ask about or remove data about their account; shown in the footer
 
 `GET /api/health` answers 200 while the database is reachable.

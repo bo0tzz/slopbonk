@@ -1,4 +1,11 @@
-import { PgBoss, type Job, type JobWithMetadata, type Queue, type SendOptions } from 'pg-boss';
+import {
+	PgBoss,
+	type Job,
+	type JobWithMetadata,
+	type Queue,
+	type QueueResult,
+	type SendOptions
+} from 'pg-boss';
 
 export type QueueOptions = Omit<Queue, 'name'>;
 
@@ -50,6 +57,22 @@ export class JobQueue {
 	/** Sends a job on the cron schedule; a run missed while the app was down is made up once. */
 	schedule<T extends object>(queue: QueueDefinition<T>, cron: string, data: T): Promise<void> {
 		return this.boss.schedule(queue.name, cron, data, { missed: 'once' });
+	}
+
+	/** Backlog and failure counts of every queue. */
+	stats(): Promise<QueueResult[]> {
+		return this.boss.getQueues();
+	}
+
+	/** Every job in the queue, with its metadata. */
+	list<T extends object>(queue: QueueDefinition<T>): Promise<JobWithMetadata<T>[]> {
+		return this.boss.findJobs<T>(queue.name);
+	}
+
+	/** One job by queue name and id; a dead-lettered job's `sourceName` and `sourceId` lead to its original. */
+	async find(queueName: string, id: string): Promise<JobWithMetadata<object> | null> {
+		const [job] = await this.boss.findJobs<object>(queueName, { id });
+		return job ?? null;
 	}
 
 	stop(): Promise<void> {

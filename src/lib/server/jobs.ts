@@ -1,14 +1,23 @@
 import { defineQueue, type QueueDefinition, type QueueOptions } from './queue';
 
 /** Rides out a GitHub outage of up to about half an hour. Rate limits defer jobs instead. */
+/** Jobs that ran out of retries, kept with their error for the admin panel; nothing works on it. */
+export const failedJobsQueue = defineQueue<object>('jobs.failed');
+
 const GITHUB_RETRIES = {
 	retryLimit: 5,
 	retryDelay: 30,
 	retryBackoff: true,
-	retryDelayMax: 60 * 60
+	retryDelayMax: 60 * 60,
+	deadLetter: failedJobsQueue.name
 } satisfies QueueOptions;
 
-const LOCAL_RETRIES = { retryLimit: 3, retryDelay: 5, retryBackoff: true } satisfies QueueOptions;
+const LOCAL_RETRIES = {
+	retryLimit: 3,
+	retryDelay: 5,
+	retryBackoff: true,
+	deadLetter: failedJobsQueue.name
+} satisfies QueueOptions;
 
 /** One installation's GitHub calls go one at a time, as GitHub asks of each token. */
 const byInstallation = ({ installationId }: { installationId: number }) => String(installationId);
@@ -116,6 +125,7 @@ export const retentionQueue = defineQueue<Record<string, never>>('retention.clea
 });
 
 export const queues: QueueDefinition<object>[] = [
+	failedJobsQueue,
 	fetchHistoryQueue,
 	evaluateQueue,
 	backfillQueue,

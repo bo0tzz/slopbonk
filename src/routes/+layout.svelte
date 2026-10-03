@@ -35,6 +35,9 @@
 				</a>
 				<HStack>
 					{#if reviewer}
+						{#if reviewer.operator}
+							<a href={resolve('/admin')} class="text-sm text-primary hover:underline">Admin</a>
+						{/if}
 						<Text size="small">{reviewer.login}</Text>
 						<form method="POST" action={resolve('/auth/logout')}>
 							<Button type="submit" size="small" variant="ghost">Sign out</Button>

@@ -20,6 +20,14 @@ export function baseUrl(): string {
 	return required('ORIGIN').replace(/\/$/, '');
 }
 
+/** GitHub user ids of the people who run this instance; they can open the admin panel. */
+export function operatorIds(): number[] {
+	return (env.OPERATOR_GITHUB_IDS ?? '')
+		.split(',')
+		.map((id) => Number(id.trim()))
+		.filter((id) => Number.isInteger(id) && id > 0);
+}
+
 export interface GithubAppConfig {
 	appId: number;
 	slug: string;
