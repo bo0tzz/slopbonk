@@ -21,14 +21,16 @@
 	<Stack gap={4}>
 		<Heading size="medium">Organisations</Heading>
 		{#each orgs as org (org.id)}
-			<Card>
-				<CardBody>
-					<Text>
-						<b>{org.login}</b>
-						· {org.toReview === 0 ? 'nothing to review' : `${org.toReview} to review`}
-					</Text>
-				</CardBody>
-			</Card>
+			<a href={resolve('/orgs/[org]', { org: org.login })}>
+				<Card>
+					<CardBody>
+						<Text>
+							<b>{org.login}</b>
+							· {org.toReview === 0 ? 'nothing to review' : `${org.toReview} to review`}
+						</Text>
+					</CardBody>
+				</Card>
+			</a>
 		{:else}
 			<Text>slopbonk isn't installed on any organisation you belong to.</Text>
 		{/each}

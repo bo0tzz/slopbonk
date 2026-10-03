@@ -1,5 +1,5 @@
 import type { Db } from '../db';
-import type { SignalValue, ActivityComment } from './signals';
+import type { SignalValue, ActivityComment } from '../scoring/signals';
 
 export function findInstallation(db: Db, installationId: number) {
 	return db

@@ -5,6 +5,8 @@ import type { JobSender } from '../queue';
 export type ReviewAction = 'block' | 'dismiss';
 
 export interface DecisionInput {
+	/** The installation the reviewer is acting in; the case must belong to it. */
+	installationId: number;
 	caseId: number;
 	/** The reviewer's GitHub user id. */
 	actorId: number;
@@ -33,7 +35,7 @@ export async function recordDecision(
 			])
 			.where('cases.id', '=', input.caseId)
 			.executeTakeFirst();
-		if (!target) {
+		if (!target || target.installation_id !== input.installationId) {
 			throw new DecisionError('No such case.');
 		}
 		if (input.action === 'block' && target.account_type !== 'Organization') {

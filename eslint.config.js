@@ -24,7 +24,7 @@ const forbid = (files, targets, message) => ({
 });
 const boundaries = [
 	forbid(
-		[`${server}/{db,queue,github,auth,testing}/**`, `${server}/{env,constants,jobs}.ts`],
+		[`${server}/{db,queue,github,auth,scoring,testing}/**`, `${server}/{env,constants,jobs}.ts`],
 		[...components, 'services'],
 		'Infrastructure must not depend on ingest, policy, act or the composition root.'
 	),

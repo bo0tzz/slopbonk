@@ -5,6 +5,7 @@ import { RULESET, score } from './rules';
 import {
 	burstAnswerShare,
 	computeSignals,
+	findBurst,
 	outwardComments,
 	peakDistinctRepos,
 	qaShare,
@@ -60,6 +61,10 @@ describe('burstAnswerShare', () => {
 		];
 		expect(burstAnswerShare(comments, 24 * 3600_000, 3)).toBe(1);
 		expect(burstAnswerShare(comments.slice(0, 4), 24 * 3600_000, 3)).toBe(0);
+		expect(findBurst(comments, 24 * 3600_000, 3).map((c) => c.repositoryId)).toEqual([5, 6, 7]);
+		expect(findBurst(comments.slice(0, 4), 24 * 3600_000, 3).map((c) => c.repositoryId)).toEqual([
+			1, 2, 3, 4
+		]);
 	});
 });
 

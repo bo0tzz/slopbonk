@@ -8,8 +8,8 @@ import {
 } from '../constants';
 import { evaluateQueue, fetchHistoryQueue, jobKey, type AccountInInstallation } from '../jobs';
 import type { JobSender } from '../queue';
-import { RULESET, score, type Ruleset } from './rules';
-import { computeSignals } from './signals';
+import { RULESET, score, type Ruleset } from '../scoring/rules';
+import { computeSignals } from '../scoring/signals';
 import {
 	findActivity,
 	findInstallation,

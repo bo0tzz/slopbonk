@@ -11,7 +11,7 @@ export interface ActivityComment {
 const INSIDER_ASSOCIATIONS = new Set(['OWNER', 'MEMBER', 'COLLABORATOR']);
 
 /** Comments on other people's threads, in repositories the account doesn't own or belong to. */
-export function outwardComments(userId: number, comments: ActivityComment[]): ActivityComment[] {
+export function outwardComments<T extends ActivityComment>(userId: number, comments: T[]): T[] {
 	return comments
 		.filter(
 			(c) =>
@@ -23,6 +23,8 @@ export function outwardComments(userId: number, comments: ActivityComment[]): Ac
 }
 
 interface WindowStats {
+	start: number;
+	end: number;
 	repos: number;
 	comments: number;
 	answers: number;
@@ -44,7 +46,7 @@ function* slidingWindows(comments: ActivityComment[], windowMs: number): Generat
 			answers += comments[end].answerable ? 1 : 0;
 			end++;
 		}
-		yield { repos: repos.size, comments: end - start, answers };
+		yield { start, end, repos: repos.size, comments: end - start, answers };
 
 		const repo = comments[start].repositoryId;
 		const remaining = repos.get(repo)! - 1;
@@ -84,6 +86,30 @@ export function burstAnswerShare(
 	return best;
 }
 
+/**
+ * The comments of the burst behind the score: the most answer-heavy window spanning at least
+ * `minRepos` repositories, or else the window with the most repositories.
+ */
+export function findBurst<T extends ActivityComment>(
+	comments: T[],
+	windowMs: number,
+	minRepos: number
+): T[] {
+	let best: { score: [number, number]; start: number; end: number } | null = null;
+	for (const window of slidingWindows(comments, windowMs)) {
+		const share = window.repos >= minRepos ? window.answers / window.comments : -1;
+		const score: [number, number] = [share, window.repos];
+		if (
+			!best ||
+			score[0] > best.score[0] ||
+			(score[0] === best.score[0] && score[1] > best.score[1])
+		) {
+			best = { score, start: window.start, end: window.end };
+		}
+	}
+	return best ? comments.slice(best.start, best.end) : [];
+}
+
 export function qaShare(comments: ActivityComment[]): number {
 	if (comments.length === 0) {
 		return 0;
@@ -91,8 +117,11 @@ export function qaShare(comments: ActivityComment[]): number {
 	return comments.filter((c) => c.answerable).length / comments.length;
 }
 
-const MINUTE = 60 * 1000;
-const DAY = 24 * 60 * MINUTE;
+export const MINUTE = 60 * 1000;
+export const DAY = 24 * 60 * MINUTE;
+
+/** A burst only counts when it spans at least this many repositories. */
+export const BURST_MIN_REPOS = 3;
 
 /** Every signal policy computes; rules can only refer to these. */
 export type SignalName = 'peak_repos_1m' | 'peak_repos_24h' | 'qa_share' | 'qa_share_burst';
@@ -110,6 +139,6 @@ export function computeSignals(userId: number, comments: ActivityComment[]): Sig
 		{ name: 'peak_repos_1m', version: 1, value: peakDistinctRepos(outward, MINUTE) },
 		{ name: 'peak_repos_24h', version: 1, value: peakDistinctRepos(outward, DAY) },
 		{ name: 'qa_share', version: 1, value: qaShare(outward) },
-		{ name: 'qa_share_burst', version: 1, value: burstAnswerShare(outward, DAY, 3) }
+		{ name: 'qa_share_burst', version: 1, value: burstAnswerShare(outward, DAY, BURST_MIN_REPOS) }
 	];
 }
