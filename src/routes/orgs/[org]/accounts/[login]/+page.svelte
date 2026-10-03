@@ -149,14 +149,21 @@
 			</Panel>
 
 			<Panel title="Decisions">
-				{#each account.decisions as decision (decision.decidedAt.getTime())}
-					<Text size="small">
-						<b>{decision.action}</b> by {decision.actor}<br />
-						<span class="text-light-600">{when(decision.decidedAt)}</span>
-					</Text>
-				{:else}
-					<Text size="small" color="muted">None yet.</Text>
-				{/each}
+				<Stack gap={3}>
+					{#each account.decisions as decision (decision.decidedAt.getTime())}
+						<Text size="small">
+							<b>{decision.action}</b> by {decision.actor}<br />
+							<span class="text-light-600">{when(decision.decidedAt)}</span>
+							{#if decision.outcome?.status === 'pending'}
+								<br /><span class="text-light-600">Waiting to be carried out on GitHub</span>
+							{:else if decision.outcome?.status === 'failed'}
+								<br /><span class="text-danger">Failed on GitHub: {decision.outcome.error}</span>
+							{/if}
+						</Text>
+					{:else}
+						<Text size="small" color="muted">None yet.</Text>
+					{/each}
+				</Stack>
 			</Panel>
 		</Stack>
 	</div>

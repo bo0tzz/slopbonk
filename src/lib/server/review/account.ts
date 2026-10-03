@@ -1,6 +1,7 @@
 import { HISTORY_HORIZON_MS } from '../constants';
 import type { Db } from '../db';
 import type { CaseState } from '../db/schema/tables/case.table';
+import type { OutboxStatus } from '../db/schema/tables/outbox.table';
 import type { ThreadKind } from '../db/schema/tables/thread.table';
 import { RULESET, score } from '../scoring/rules';
 import {
@@ -47,7 +48,13 @@ export interface AccountEvidence {
 	/** Outward comments per day for the last 30 days, oldest first. */
 	activity: { day: string; comments: number }[];
 	burst: EvidenceComment[];
-	decisions: { action: string; actor: string; decidedAt: Date }[];
+	decisions: {
+		action: string;
+		actor: string;
+		decidedAt: Date;
+		/** Whether the decision's GitHub action has been carried out; null when there is none. */
+		outcome: { status: OutboxStatus; error: string | null } | null;
+	}[];
 	reportUrl: string;
 	reportSummary: string;
 }
@@ -152,7 +159,14 @@ export async function accountEvidence(
 	const decisions = await db
 		.selectFrom('decisions')
 		.innerJoin('github_users', 'github_users.id', 'decisions.actor_id')
-		.select(['decisions.action', 'decisions.decided_at', 'github_users.login'])
+		.leftJoin('outbox', 'outbox.decision_id', 'decisions.id')
+		.select([
+			'decisions.action',
+			'decisions.decided_at',
+			'github_users.login',
+			'outbox.status',
+			'outbox.last_error'
+		])
 		.where('decisions.case_id', '=', found.case_id)
 		.orderBy('decisions.decided_at', 'desc')
 		.execute();
@@ -181,7 +195,8 @@ export async function accountEvidence(
 		decisions: decisions.map((d) => ({
 			action: d.action,
 			actor: d.login,
-			decidedAt: new Date(d.decided_at)
+			decidedAt: new Date(d.decided_at),
+			outcome: d.status ? { status: d.status, error: d.last_error } : null
 		})),
 		reportUrl: reportUrl(found.login),
 		reportSummary: summary(found.login, installation.login, rules, burst)

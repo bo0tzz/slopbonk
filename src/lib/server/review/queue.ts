@@ -1,6 +1,7 @@
 import { QUEUE_THRESHOLD } from '../constants';
 import type { Db } from '../db';
 import type { CaseState } from '../db/schema/tables/case.table';
+import type { OutboxStatus } from '../db/schema/tables/outbox.table';
 import type { SignalName } from '../scoring/signals';
 import { threadUrl } from './links';
 
@@ -14,6 +15,8 @@ export interface QueueEntry {
 	lastSeen: Date;
 	signals: Partial<Record<SignalName, number>>;
 	latestComment: { body: string; url: string; createdAt: Date } | null;
+	/** For blocked accounts, whether the latest block has been carried out on GitHub. */
+	blockStatus: OutboxStatus | null;
 }
 
 export interface QueueCounts {
@@ -103,6 +106,24 @@ export async function listQueue(
 		.orderBy('comments.created_at', 'desc')
 		.execute();
 
+	const blocks =
+		tab === 'blocked'
+			? await db
+					.selectFrom('outbox')
+					.innerJoin('decisions', 'decisions.id', 'outbox.decision_id')
+					.distinctOn('decisions.case_id')
+					.select(['decisions.case_id', 'outbox.status'])
+					.where(
+						'decisions.case_id',
+						'in',
+						cases.map((c) => c.id)
+					)
+					.where('outbox.action', '=', 'block_user')
+					.orderBy('decisions.case_id')
+					.orderBy('outbox.id', 'desc')
+					.execute()
+			: [];
+
 	return cases.map((c) => {
 		const comment = latest.find((l) => l.author_id === c.user_id);
 		return {
@@ -120,7 +141,8 @@ export async function listQueue(
 						url: threadUrl(comment.owner_login, comment.name, comment.kind, comment.number),
 						createdAt: new Date(comment.created_at)
 					}
-				: null
+				: null,
+			blockStatus: blocks.find((b) => b.case_id === c.id)?.status ?? null
 		};
 	});
 }

@@ -59,7 +59,14 @@
 					</a>
 					<Text size="small" color="muted">last seen {ago(entry.lastSeen)}</Text>
 				</div>
-				<Badge color={entry.score >= 4 ? 'danger' : 'warning'}>{entry.score}/4</Badge>
+				<Badge color={tab !== 'review' ? 'secondary' : entry.score >= 4 ? 'danger' : 'warning'}>
+					{entry.score}/4
+				</Badge>
+				{#if entry.blockStatus === 'failed'}
+					<Badge color="danger">block failed</Badge>
+				{:else if entry.blockStatus === 'pending'}
+					<Badge color="secondary">block pending</Badge>
+				{/if}
 			</div>
 			<div class="flex flex-wrap divide-x divide-light-300">
 				{#each entry.stats as stat (stat.signal)}
