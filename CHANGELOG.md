@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0](https://github.com/bo0tzz/slopbonk/compare/v0.1.0...v0.2.0) (2026-10-03)
+
+
+### Features
+
+* fold the account's comments in the organisation away by default ([20c3dd6](https://github.com/bo0tzz/slopbonk/commit/20c3dd65435c29c71d8787453b8e01f841a96416))
+* footer with a contact address for data requests ([c0d9752](https://github.com/bo0tzz/slopbonk/commit/c0d9752a149c39cb936dd80f4e9d62f1a835adf9))
+* link to the source code from the header ([3e76802](https://github.com/bo0tzz/slopbonk/commit/3e7680246b99854e15b37af4ecaa7b2130174e87))
+* refresh queue counts and lists every 30 seconds while the page is visible ([bd6effb](https://github.com/bo0tzz/slopbonk/commit/bd6effb2582b2c1bba64160c77fbebc7141042c2))
+* show a newly installed organisation without waiting for the reviewer cache ([83f9c61](https://github.com/bo0tzz/slopbonk/commit/83f9c6116129b6c16363d4d1ddf502099ba4f176))
+
+
+### Bug Fixes
+
+* **deps:** pin postgres docker tag to 5a5a84b ([#2](https://github.com/bo0tzz/slopbonk/issues/2)) ([1b2b0a3](https://github.com/bo0tzz/slopbonk/commit/1b2b0a397457f5229ea4dbf9949985fb4c8c1420))
+* line up queue cards' scores regardless of login length ([c1749bf](https://github.com/bo0tzz/slopbonk/commit/c1749bf81d156c016401016195e386676e66ff0d))
+
 ## [0.1.0](https://github.com/bo0tzz/slopbonk/compare/v0.0.1...v0.1.0) (2026-10-03)
 
 
