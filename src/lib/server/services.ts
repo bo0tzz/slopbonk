@@ -5,6 +5,7 @@ import { databaseUrl, githubApp } from './env';
 import { createApp, installationClient, type GithubClient } from './github/client';
 import { fetchHistoryWorker } from './ingest/workers';
 import { queues } from './jobs';
+import { evaluateWorker } from './policy/workers';
 import { startQueue, type JobQueue } from './queue';
 
 export interface Services {
@@ -25,7 +26,8 @@ export async function startServices(): Promise<Services> {
 	await migrateToLatest(db);
 
 	const queue = await startQueue(databaseUrl(), queues, (queue) => [
-		fetchHistoryWorker({ db, queue, clientFor })
+		fetchHistoryWorker({ db, queue, clientFor }),
+		evaluateWorker({ db, queue })
 	]);
 
 	services = { db, queue, clientFor, webhookSecret: github.webhookSecret };

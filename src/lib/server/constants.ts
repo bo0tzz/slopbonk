@@ -25,5 +25,11 @@ export const RETENTION = {
 	uninstalledTenantMs: 30 * DAY
 };
 
+/** Author associations whose comments never put an account in the review queue (ADR-0003). */
+export const EXEMPT_ASSOCIATIONS = ['OWNER', 'MEMBER', 'COLLABORATOR', 'CONTRIBUTOR'];
+
+/** A dismissed account returns to the queue once its score exceeds the dismissed score by this much. */
+export const REOPEN_SCORE_MARGIN = 1;
+
 /** Lifetime of a reviewer's session cookie before membership is checked again (ADR-0002). */
 export const SESSION_LIFETIME_MS = 1 * HOUR;

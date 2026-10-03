@@ -48,7 +48,7 @@ describe('migrations', () => {
 	it('keeps signal definitions insert-only', async () => {
 		await db
 			.insertInto('signal_definitions')
-			.values({ name: 'peak_repos_24h', version: 1, description: 'test' })
+			.values({ name: 'test_signal', version: 1, description: 'test' })
 			.execute();
 		await expect(
 			db.updateTable('signal_definitions').set({ description: 'changed' }).execute()
