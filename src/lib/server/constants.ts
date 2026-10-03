@@ -27,6 +27,3 @@ export const RETENTION = {
 
 /** Lifetime of a reviewer's session cookie before membership is checked again (ADR-0002). */
 export const SESSION_LIFETIME_MS = 1 * HOUR;
-
-/** Stop issuing GitHub requests on an installation token when fewer than this many remain. */
-export const RATE_LIMIT_HEADROOM = 500;

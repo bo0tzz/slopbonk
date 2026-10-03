@@ -1,7 +1,7 @@
 import { Webhooks, type EmitterWebhookEvent } from '@octokit/webhooks';
 import type { Db } from '../db';
 import type { JobQueue } from '../queue';
-import { evaluateKey, evaluateQueue } from '../policy/queues';
+import { evaluateQueue, jobKey } from '../jobs';
 import { storeComment, storeRepository, storeThread } from './store';
 
 type Queue = Pick<JobQueue, 'send'>;
@@ -138,5 +138,5 @@ async function recordComment({ db, queue }: Deps, event: CommentEvent) {
 	});
 
 	const job = { installationId, userId: author.id };
-	await queue.send(evaluateQueue, job, { singletonKey: evaluateKey(job) });
+	await queue.send(evaluateQueue, job, { singletonKey: jobKey(job) });
 }

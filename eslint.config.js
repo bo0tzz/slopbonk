@@ -8,6 +8,34 @@ import ts from 'typescript-eslint';
 
 const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
+// Architecture boundaries (ADR-0002): infrastructure doesn't depend on components or the
+// composition root, and ingest, policy and act only talk to each other through jobs.ts.
+const server = 'src/lib/server';
+const components = ['ingest', 'policy', 'act'];
+const forbid = (files, targets, message) => ({
+	files,
+	rules: {
+		'no-restricted-imports': [
+			'error',
+			{ patterns: [{ regex: `(^|/)(${targets.join('|')})(/|$)`, message }] }
+		]
+	}
+});
+const boundaries = [
+	forbid(
+		[`${server}/{db,queue,github,testing}/**`, `${server}/{env,constants,jobs}.ts`],
+		[...components, 'services'],
+		'Infrastructure must not depend on ingest, policy, act or the composition root.'
+	),
+	...components.map((component) =>
+		forbid(
+			[`${server}/${component}/**`],
+			[...components.filter((other) => other !== component), 'services'],
+			`${component} may only reach other components through jobs.ts.`
+		)
+	)
+];
+
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	js.configs.recommended,
@@ -33,6 +61,7 @@ export default defineConfig(
 			}
 		}
 	},
+	...boundaries,
 	{
 		files: ['src/lib/server/db/migrations/**'],
 		rules: {

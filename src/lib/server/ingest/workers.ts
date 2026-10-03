@@ -1,9 +1,8 @@
 import type { Db } from '../db';
 import type { GithubClient } from '../github/client';
-import { evaluateKey, evaluateQueue } from '../policy/queues';
 import { worker, type JobQueue } from '../queue';
 import { fetchHistory } from './history';
-import { fetchHistoryQueue } from './queues';
+import { evaluateQueue, fetchHistoryQueue, jobKey } from '../jobs';
 
 interface Deps {
 	db: Db;
@@ -14,6 +13,6 @@ interface Deps {
 export function fetchHistoryWorker({ db, queue, clientFor }: Deps) {
 	return worker(fetchHistoryQueue, async ({ data }) => {
 		await fetchHistory(db, await clientFor(data.installationId), data.userId);
-		await queue.send(evaluateQueue, data, { singletonKey: evaluateKey(data) });
+		await queue.send(evaluateQueue, data, { singletonKey: jobKey(data) });
 	});
 }
