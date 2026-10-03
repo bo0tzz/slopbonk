@@ -3,4 +3,4 @@ allowBuilds:
 
 overrides:
   # SvelteKit 2 pins cookie ^0.6.0, which has a low-severity advisory fixed in 0.7.0 with the same API.
-  cookie@<0.7.0: ^0.7.2
+  cookie@<0.7.0: ^1.0.0
