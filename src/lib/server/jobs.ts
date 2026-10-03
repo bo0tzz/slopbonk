@@ -104,6 +104,12 @@ export const OUTBOX_RETRY_LIMIT = GITHUB_RETRIES.retryLimit;
 
 export const outboxQueue = defineQueue<OutboxItem>('act.outbox', GITHUB_RETRIES, byInstallation);
 
+/** Re-fetches every account with a case, so suspensions and later activity are noticed. */
+export const refreshCasesQueue = defineQueue<Record<string, never>>('policy.refresh-cases', {
+	policy: 'stately',
+	...LOCAL_RETRIES
+});
+
 export const retentionQueue = defineQueue<Record<string, never>>('retention.cleanup', {
 	policy: 'stately',
 	...LOCAL_RETRIES
@@ -116,5 +122,6 @@ export const queues: QueueDefinition<object>[] = [
 	backfillPageQueue,
 	backfillCommentsQueue,
 	outboxQueue,
+	refreshCasesQueue,
 	retentionQueue
 ];

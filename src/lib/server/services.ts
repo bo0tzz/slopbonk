@@ -16,8 +16,8 @@ import {
 	backfillWorker,
 	fetchHistoryWorker
 } from './ingest/workers';
-import { queues, retentionQueue } from './jobs';
-import { evaluateWorker } from './policy/workers';
+import { queues, refreshCasesQueue, retentionQueue } from './jobs';
+import { evaluateWorker, refreshCasesWorker } from './policy/workers';
 import { retentionWorker } from './retention/workers';
 import { startQueue, type JobQueue } from './queue';
 
@@ -51,11 +51,13 @@ export async function startServices(): Promise<Services> {
 			backfillCommentsWorker({ db, queue, clientFor }),
 			evaluateWorker({ db, queue }),
 			outboxWorker({ db, actionsFor }),
+			refreshCasesWorker({ db, queue }),
 			retentionWorker({ db })
 		],
 		{ deferUntil }
 	);
 	await queue.schedule(retentionQueue, '17 3 * * *', {});
+	await queue.schedule(refreshCasesQueue, '43 4 * * *', {});
 	await requeuePending(db, queue);
 
 	const reviewChanges = await listenForReviewChanges(databaseUrl());

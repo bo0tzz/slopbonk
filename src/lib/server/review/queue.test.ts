@@ -4,7 +4,7 @@ import { migrateToLatest } from '../db/migrate';
 import type { CaseState } from '../db/schema/tables/case.table';
 import { createTestDatabase } from '../testing/database';
 import { seedCase } from '../testing/fixtures';
-import { nextToReview, queueCounts } from './queue';
+import { listQueue, nextToReview, queueCounts } from './queue';
 
 const INSTALLATION = 10;
 
@@ -46,5 +46,13 @@ describe('review queue', () => {
 
 		expect(await nextToReview(db, INSTALLATION, top)).toBe('user-302');
 		expect(await nextToReview(db, INSTALLATION, -1)).toBe('user-301');
+	});
+
+	it('shows which accounts GitHub no longer has', async () => {
+		const goneAt = new Date('2026-10-02T08:00:00Z');
+		await db.insertInto('tracked_users').values({ user_id: 302, gone_at: goneAt }).execute();
+		const entries = await listQueue(db, { id: INSTALLATION, accountId: 100 }, 'review');
+		expect(entries.find((e) => e.login === 'user-302')?.goneAt).toEqual(goneAt);
+		expect(entries.find((e) => e.login === 'user-301')?.goneAt).toBeNull();
 	});
 });

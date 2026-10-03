@@ -16,6 +16,8 @@ export interface QueueEntry {
 	lastSeen: Date;
 	stats: Stat[];
 	latestComment: { body: string; url: string; createdAt: Date } | null;
+	/** When GitHub stopped returning the account: deleted or suspended. */
+	goneAt: Date | null;
 	/** For blocked accounts, whether the latest block has been carried out on GitHub. */
 	blockStatus: OutboxStatus | null;
 }
@@ -46,7 +48,9 @@ export async function listQueue(
 	let query = db
 		.selectFrom('cases')
 		.innerJoin('github_users', 'github_users.id', 'cases.user_id')
+		.leftJoin('tracked_users', 'tracked_users.user_id', 'cases.user_id')
 		.select([
+			'tracked_users.gone_at',
 			'cases.id',
 			'cases.user_id',
 			'cases.score',
@@ -146,6 +150,7 @@ export async function listQueue(
 						createdAt: new Date(comment.created_at)
 					}
 				: null,
+			goneAt: c.gone_at ? new Date(c.gone_at) : null,
 			blockStatus: blocks.find((b) => b.case_id === c.id)?.status ?? null
 		};
 	});

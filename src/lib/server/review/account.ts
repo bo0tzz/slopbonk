@@ -36,6 +36,8 @@ export interface AccountEvidence {
 	userId: number;
 	login: string;
 	accountCreatedAt: Date | null;
+	/** When GitHub stopped returning the account: deleted or suspended. */
+	goneAt: Date | null;
 	followers: number | null;
 	caseId: number;
 	state: CaseState;
@@ -72,7 +74,9 @@ export async function accountEvidence(
 	const found = await db
 		.selectFrom('cases')
 		.innerJoin('github_users', 'github_users.id', 'cases.user_id')
+		.leftJoin('tracked_users', 'tracked_users.user_id', 'cases.user_id')
 		.select([
+			'tracked_users.gone_at',
 			'cases.id as case_id',
 			'cases.state',
 			'cases.score',
@@ -190,6 +194,7 @@ export async function accountEvidence(
 		userId: found.user_id,
 		login: found.login,
 		accountCreatedAt: found.account_created_at ? new Date(found.account_created_at) : null,
+		goneAt: found.gone_at ? new Date(found.gone_at) : null,
 		followers: found.followers,
 		caseId: found.case_id,
 		state: found.state,

@@ -75,9 +75,18 @@
 					{entry.score}/{data.maxScore}
 				</Badge>
 				{#if entry.blockStatus === 'failed'}
-					<Badge color="danger">block failed</Badge>
+					<Badge color="danger" class="whitespace-nowrap">block failed</Badge>
 				{:else if entry.blockStatus === 'pending'}
-					<Badge color="secondary">block pending</Badge>
+					<Badge color="secondary" class="whitespace-nowrap">block pending</Badge>
+				{/if}
+				{#if entry.goneAt}
+					<Badge
+						color="secondary"
+						class="whitespace-nowrap"
+						title="Deleted or suspended on GitHub; noticed {ago(entry.goneAt)}"
+					>
+						gone
+					</Badge>
 				{/if}
 			</div>
 			<div class="flex flex-wrap divide-x divide-light-300">

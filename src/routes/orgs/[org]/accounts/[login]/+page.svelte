@@ -57,12 +57,20 @@
 				<div class="flex items-center gap-2">
 					<Heading size="medium">{account.login}</Heading>
 					<Badge color={account.state === 'open' ? 'warning' : 'secondary'}>{account.state}</Badge>
+					{#if account.goneAt}
+						<Badge color="secondary">gone from GitHub</Badge>
+					{/if}
 				</div>
 				<Text size="small" color="muted">
 					<ExternalLink href="https://github.com/{account.login}">GitHub profile</ExternalLink>
 					{#if account.accountCreatedAt}· account from {account.accountCreatedAt.getFullYear()}{/if}
 					{#if account.followers !== null}· {account.followers} followers{/if}
 				</Text>
+				{#if account.goneAt}
+					<Text size="small" color="muted">
+						GitHub no longer shows this account, deleted or suspended, as of {when(account.goneAt)}.
+					</Text>
+				{/if}
 			</div>
 		</div>
 		{#if account.state === 'open'}
