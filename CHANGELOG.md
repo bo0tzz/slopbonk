@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/bo0tzz/slopbonk/compare/v0.2.0...v0.3.0) (2026-10-03)
+
+
+### Features
+
+* admin panel for instance operators: queues, failed jobs and actions, installations, rate limits ([eff2ff0](https://github.com/bo0tzz/slopbonk/commit/eff2ff07e5e61d1132bad30c3ace02ae4de89f35))
+* keep the earlier versions of edited comments in the organisation's repositories ([b477e27](https://github.com/bo0tzz/slopbonk/commit/b477e27af8a319aaf127bf64e1627148019da403))
+* notice accounts GitHub deletes or suspends, with a daily refresh of every account with a case ([843a2c2](https://github.com/bo0tzz/slopbonk/commit/843a2c2754d9e8f5f281b3d40a6fbb2fd8851529))
+* pages update when their data changes, through Postgres notifications and server-sent events ([dace86d](https://github.com/bo0tzz/slopbonk/commit/dace86de1933c59f9d28675dd6f74cde7fa22dcc))
+
+
+### Bug Fixes
+
+* a proper footer at the bottom of the page ([aec8117](https://github.com/bo0tzz/slopbonk/commit/aec8117730b5612a78c8e214a2a3af67b4fe8566))
+* fold each of the account's comments in the organisation, not the whole card ([74dc218](https://github.com/bo0tzz/slopbonk/commit/74dc2185a72264a610f4fef1ec775499cb63cb30))
+
 ## [0.2.0](https://github.com/bo0tzz/slopbonk/compare/v0.1.0...v0.2.0) (2026-10-03)
 
 
