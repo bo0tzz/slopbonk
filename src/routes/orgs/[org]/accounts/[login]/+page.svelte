@@ -154,6 +154,9 @@
 						<Text size="small">
 							<b>{decision.action}</b> by {decision.actor}<br />
 							<span class="text-light-600">{when(decision.decidedAt)}</span>
+							{#if decision.reason}
+								<br /><span class="text-light-600">{decision.reason}</span>
+							{/if}
 							{#if decision.block?.status === 'pending'}
 								<br /><span class="text-light-600">Waiting to be carried out on GitHub</span>
 							{:else if decision.block?.status === 'failed'}

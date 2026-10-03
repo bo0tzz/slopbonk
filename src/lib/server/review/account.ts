@@ -50,6 +50,7 @@ export interface AccountEvidence {
 		action: string;
 		actor: string;
 		decidedAt: Date;
+		reason: string | null;
 		/** How far the decision's GitHub actions have got; null for a block not asked for. */
 		block: ActionOutcome | null;
 		hidden: (ActionOutcome & { total: number }) | null;
@@ -150,7 +151,13 @@ export async function accountEvidence(
 	const decisions = await db
 		.selectFrom('decisions')
 		.innerJoin('github_users', 'github_users.id', 'decisions.actor_id')
-		.select(['decisions.id', 'decisions.action', 'decisions.decided_at', 'github_users.login'])
+		.select([
+			'decisions.id',
+			'decisions.action',
+			'decisions.reason',
+			'decisions.decided_at',
+			'github_users.login'
+		])
 		.where('decisions.case_id', '=', found.case_id)
 		.orderBy('decisions.decided_at', 'desc')
 		.execute();
@@ -188,6 +195,7 @@ export async function accountEvidence(
 				action: d.action,
 				actor: d.login,
 				decidedAt: new Date(d.decided_at),
+				reason: d.reason,
 				block: block ? { status: block.status, error: block.last_error } : null,
 				hidden: hides.length ? { total: hides.length, ...overall(hides) } : null
 			};

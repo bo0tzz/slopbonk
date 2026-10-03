@@ -1,7 +1,7 @@
 import { Webhooks, type EmitterWebhookEvent } from '@octokit/webhooks';
 import type { Db } from '../db';
 import type { JobSender } from '../queue';
-import { backfillQueue, evaluateQueue, jobKey } from '../jobs';
+import { backfillQueue, evaluateQueue, githubBlockChangeQueue, jobKey } from '../jobs';
 import { storeComment, storeRepository, storeThread, storeUser } from './store';
 
 interface Deps {
@@ -44,6 +44,22 @@ export async function handleWebhookRequest(request: Request, deps: Deps): Promis
 	webhooks.on(['installation.deleted', 'installation.suspend'], (event) =>
 		markUninstalled(deps.db, event.payload.installation.id)
 	);
+	webhooks.on(['org_block.blocked', 'org_block.unblocked'], async (event) => {
+		const { installation, blocked_user: user, sender } = event.payload;
+		// slopbonk's own blocks come back from the app's bot account.
+		if (!installation || !user || sender.type !== 'User') {
+			return;
+		}
+		await deps.queue.send(githubBlockChangeQueue, {
+			installationId: installation.id,
+			userId: user.id,
+			action: event.payload.action === 'blocked' ? 'block' : 'unblock',
+			actor: { id: sender.id, login: sender.login }
+		});
+	});
+	webhooks.on('installation_target.renamed', (event) =>
+		recordRename(deps.db, event.payload.installation.id, event.payload.account)
+	);
 	webhooks.on(['discussion_comment.created', 'issue_comment.created'], (event) =>
 		recordComment(deps, event)
 	);
@@ -73,6 +89,27 @@ async function recordInstallation(db: Db, installation: InstallationPayload) {
 		.insertInto('installations')
 		.values({ id: installation.id, ...values })
 		.onConflict((oc) => oc.column('id').doUpdateSet(values))
+		.execute();
+}
+
+async function recordRename(
+	db: Db,
+	installationId: number,
+	account: { id: number; login?: string; slug?: string }
+) {
+	const login = account.login ?? account.slug;
+	if (!login) {
+		return;
+	}
+	await db
+		.updateTable('installations')
+		.set({ account_login: login })
+		.where('id', '=', installationId)
+		.execute();
+	await db
+		.updateTable('repositories')
+		.set({ owner_login: login })
+		.where('owner_id', '=', account.id)
 		.execute();
 }
 

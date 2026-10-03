@@ -18,6 +18,7 @@ import {
 import { queues, retentionQueue } from './jobs';
 import { evaluateWorker } from './policy/workers';
 import { retentionWorker } from './retention/workers';
+import { githubBlockChangeWorker } from './review/workers';
 import { startQueue, type JobQueue } from './queue';
 
 export interface Services {
@@ -49,6 +50,7 @@ export async function startServices(): Promise<Services> {
 			backfillCommentsWorker({ db, queue, clientFor }),
 			evaluateWorker({ db, queue }),
 			outboxWorker({ db, actionsFor }),
+			githubBlockChangeWorker({ db }),
 			retentionWorker({ db })
 		],
 		{ deferUntil }

@@ -3,7 +3,7 @@ import { createDb, type Db } from '../db';
 import { migrateToLatest } from '../db/migrate';
 import { createTestDatabase } from '../testing/database';
 import { seedCase } from '../testing/fixtures';
-import { DecisionError, recordDecision } from './decisions';
+import { DecisionError, recordDecision, recordGithubBlockChange } from './decisions';
 
 const REVIEWER = 1;
 
@@ -127,5 +127,51 @@ describe('recordDecision', () => {
 			})
 		).rejects.toThrow(DecisionError);
 		expect((await caseState(caseId)).state).toBe('open');
+	});
+
+	it('follows blocks and unblocks made on GitHub for flagged accounts', async () => {
+		const caseId = await seedCase(db, { installationId: 10, userId: 105 });
+		const change = (action: 'block' | 'unblock') =>
+			recordGithubBlockChange(db, {
+				installationId: 10,
+				userId: 105,
+				action,
+				actor: { id: 7, login: 'maintainer' }
+			});
+
+		await change('block');
+		await change('block');
+		expect((await caseState(caseId)).state).toBe('blocked');
+		await change('unblock');
+		expect(await caseState(caseId)).toEqual({ state: 'dismissed', dismissed_score: 4 });
+
+		const decisions = await db
+			.selectFrom('decisions')
+			.select(['action', 'actor_id', 'reason'])
+			.where('case_id', '=', caseId)
+			.orderBy('id')
+			.execute();
+		expect(decisions).toEqual([
+			{ action: 'block', actor_id: 7, reason: 'Blocked on GitHub' },
+			{ action: 'unblock', actor_id: 7, reason: 'Unblocked on GitHub' }
+		]);
+		const outboxItems = await db
+			.selectFrom('outbox')
+			.innerJoin('decisions', 'decisions.id', 'outbox.decision_id')
+			.select('outbox.id')
+			.where('decisions.case_id', '=', caseId)
+			.execute();
+		expect(outboxItems).toEqual([]);
+	});
+
+	it('ignores GitHub blocks of accounts without a case', async () => {
+		await expect(
+			recordGithubBlockChange(db, {
+				installationId: 10,
+				userId: 999,
+				action: 'block',
+				actor: { id: 7, login: 'maintainer' }
+			})
+		).resolves.toBeUndefined();
 	});
 });
