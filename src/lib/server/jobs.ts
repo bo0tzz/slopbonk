@@ -21,4 +21,16 @@ export const evaluateQueue = defineQueue<AccountInInstallation>('policy.evaluate
 	policy: 'stately'
 });
 
-export const queues: QueueDefinition<object>[] = [fetchHistoryQueue, evaluateQueue];
+export interface OutboxItem {
+	outboxId: number;
+}
+
+export const OUTBOX_RETRY_LIMIT = 3;
+
+/** Carries out one outbox item against GitHub; retried with backoff before the item is marked failed. */
+export const outboxQueue = defineQueue<OutboxItem>('act.outbox', {
+	retryLimit: OUTBOX_RETRY_LIMIT,
+	retryBackoff: true
+});
+
+export const queues: QueueDefinition<object>[] = [fetchHistoryQueue, evaluateQueue, outboxQueue];

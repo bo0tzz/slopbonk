@@ -9,9 +9,10 @@ import ts from 'typescript-eslint';
 const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
 // Architecture boundaries (ADR-0002): infrastructure doesn't depend on components or the
-// composition root, and ingest, policy and act only talk to each other through jobs.ts.
+// composition root, and the components (ingest, policy, act, review) only talk to each other
+// through jobs.ts.
 const server = 'src/lib/server';
-const components = ['ingest', 'policy', 'act'];
+const components = ['ingest', 'policy', 'act', 'review'];
 const forbid = (files, targets, message) => ({
 	files,
 	rules: {

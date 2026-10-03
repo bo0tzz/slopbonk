@@ -136,6 +136,11 @@ const ThrottledOctokit = Octokit.plugin(throttling).defaults({
 	}
 });
 
+/** Writes slopbonk makes on an installation's behalf (act only). */
+export interface GithubActions {
+	blockUser(org: string, login: string): Promise<void>;
+}
+
 export function createApp(config: GithubAppConfig): App {
 	return new App({ appId: config.appId, privateKey: config.privateKey, Octokit: ThrottledOctokit });
 }
@@ -185,6 +190,26 @@ export async function installationClient(app: App, installationId: number): Prom
 				user: { issueComments: Connection<IssueCommentNode> } | null;
 			}>(octokit, ISSUE_COMMENTS, { login, cursor });
 			return toPage(data.user?.issueComments);
+		}
+	};
+}
+
+export async function installationActions(
+	app: App,
+	installationId: number
+): Promise<GithubActions> {
+	const octokit = await app.getInstallationOctokit(installationId);
+	return {
+		async blockUser(org, login) {
+			try {
+				await octokit.request('PUT /orgs/{org}/blocks/{username}', { org, username: login });
+			} catch (error) {
+				const { status, message } = error as { status?: number; message?: string };
+				// GitHub also uses 422 for other refusals (e.g. blocking a member), so check the reason.
+				if (status !== 422 || !/already/i.test(message ?? '')) {
+					throw error;
+				}
+			}
 		}
 	};
 }

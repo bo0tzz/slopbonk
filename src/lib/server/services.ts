@@ -2,7 +2,14 @@
 import { createDb, type Db } from './db';
 import { migrateToLatest } from './db/migrate';
 import { databaseUrl, githubApp } from './env';
-import { createApp, installationClient, type GithubClient } from './github/client';
+import { outboxWorker } from './act/workers';
+import { requeuePending } from './act/outbox';
+import {
+	createApp,
+	installationActions,
+	installationClient,
+	type GithubClient
+} from './github/client';
 import { fetchHistoryWorker } from './ingest/workers';
 import { queues } from './jobs';
 import { evaluateWorker } from './policy/workers';
@@ -21,14 +28,17 @@ export async function startServices(): Promise<Services> {
 	const github = githubApp();
 	const app = createApp(github);
 	const clientFor = (installationId: number) => installationClient(app, installationId);
+	const actionsFor = (installationId: number) => installationActions(app, installationId);
 
 	const db = createDb(databaseUrl());
 	await migrateToLatest(db);
 
 	const queue = await startQueue(databaseUrl(), queues, (queue) => [
 		fetchHistoryWorker({ db, queue, clientFor }),
-		evaluateWorker({ db, queue })
+		evaluateWorker({ db, queue }),
+		outboxWorker({ db, actionsFor })
 	]);
+	await requeuePending(db, queue);
 
 	services = { db, queue, clientFor, webhookSecret: github.webhookSecret };
 	return services;
