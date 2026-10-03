@@ -62,7 +62,8 @@ export async function startQueue(
 	}
 	const jobQueue = new JobQueue(boss);
 	for (const { queue, handle } of createWorkers(jobQueue)) {
-		await boss.work<object>(queue.name, async (jobs) => {
+		// Without this, a worker takes one job per polling interval even with a backlog waiting.
+		await boss.work<object>(queue.name, { burstWhenReadyExceeds: 1 }, async (jobs) => {
 			for (const job of jobs) {
 				await handle(job);
 			}
