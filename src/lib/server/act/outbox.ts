@@ -1,5 +1,6 @@
 import type { Db } from '../db';
 import type { GithubActions } from '../github/actions';
+import { RateLimitedError } from '../github/rate-limit';
 import { outboxQueue } from '../jobs';
 import type { JobSender } from '../queue';
 
@@ -24,6 +25,7 @@ export async function carryOut(
 			'outbox.status',
 			'outbox.action',
 			'outbox.installation_id',
+			'outbox.comment_id',
 			'installations.account_login',
 			'installations.account_type',
 			'github_users.login'
@@ -36,17 +38,27 @@ export async function carryOut(
 
 	try {
 		const actions = await actionsFor(item.installation_id);
-		if (item.action !== 'block_user') {
-			throw new PermanentActionError(`Unsupported action ${item.action}.`);
+		switch (item.action) {
+			case 'block_user':
+				if (item.account_type !== 'Organization') {
+					throw new PermanentActionError('Only organisations can block accounts through an app.');
+				}
+				if (!item.login) {
+					throw new PermanentActionError('The target account is unknown.');
+				}
+				await actions.blockUser(item.account_login, item.login);
+				break;
+			case 'minimize_comment':
+				if (!item.comment_id) {
+					throw new PermanentActionError('No comment to hide.');
+				}
+				await actions.minimizeComment(item.comment_id);
+				break;
 		}
-		if (item.account_type !== 'Organization') {
-			throw new PermanentActionError('Only organisations can block accounts through an app.');
-		}
-		if (!item.login) {
-			throw new PermanentActionError('The target account is unknown.');
-		}
-		await actions.blockUser(item.account_login, item.login);
 	} catch (error) {
+		if (error instanceof RateLimitedError) {
+			throw error;
+		}
 		const permanent = error instanceof PermanentActionError;
 		await db
 			.updateTable('outbox')

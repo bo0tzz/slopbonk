@@ -11,6 +11,8 @@ export interface DecisionInput {
 	/** The reviewer; their account row is restored if retention removed it since they signed in. */
 	actor: { id: number; login: string };
 	action: ReviewAction;
+	/** With a block, also hide the account's comments in the organisation's repositories. */
+	hideComments?: boolean;
 	reason?: string;
 	/** The evaluation the reviewer was looking at; defaults to the account's latest. */
 	evaluationId?: number;
@@ -31,6 +33,7 @@ export async function recordDecision(
 				'cases.user_id',
 				'cases.score',
 				'cases.installation_id',
+				'installations.account_id',
 				'installations.account_type'
 			])
 			.where('cases.id', '=', input.caseId)
@@ -82,19 +85,38 @@ export async function recordDecision(
 			.where('id', '=', input.caseId)
 			.execute();
 
-		const outbox =
-			input.action === 'block'
+		const outbox = [];
+		if (input.action === 'block') {
+			const base = {
+				decision_id: decisionId,
+				installation_id: target.installation_id,
+				target_user_id: target.user_id
+			};
+			const comments = input.hideComments
 				? await tx
-						.insertInto('outbox')
-						.values({
-							decision_id: decisionId,
-							installation_id: target.installation_id,
-							action: 'block_user',
-							target_user_id: target.user_id
-						})
-						.returning('id')
+						.selectFrom('comments')
+						.innerJoin('threads', 'threads.id', 'comments.thread_id')
+						.innerJoin('repositories', 'repositories.id', 'threads.repository_id')
+						.select('comments.id')
+						.where('comments.author_id', '=', target.user_id)
+						.where('repositories.owner_id', '=', target.account_id)
 						.execute()
 				: [];
+			outbox.push(
+				...(await tx
+					.insertInto('outbox')
+					.values([
+						{ ...base, action: 'block_user' as const },
+						...comments.map((comment) => ({
+							...base,
+							action: 'minimize_comment' as const,
+							comment_id: comment.id
+						}))
+					])
+					.returning('id')
+					.execute())
+			);
+		}
 		return {
 			decisionId,
 			installationId: target.installation_id,

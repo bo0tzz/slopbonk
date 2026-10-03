@@ -66,6 +66,29 @@ describe('recordDecision', () => {
 		);
 	});
 
+	it("can also hide the account's comments in the organisation", async () => {
+		const caseId = await seedCase(db, { installationId: 10, userId: 102, comments: 2 });
+		const { decisionId, outboxIds } = await recordDecision(db, queue, {
+			installationId: 10,
+			caseId,
+			actor: { id: REVIEWER, login: 'reviewer' },
+			action: 'block',
+			hideComments: true
+		});
+		const items = await db
+			.selectFrom('outbox')
+			.select(['action', 'comment_id'])
+			.where('decision_id', '=', decisionId)
+			.orderBy('id')
+			.execute();
+		expect(items).toEqual([
+			{ action: 'block_user', comment_id: null },
+			{ action: 'minimize_comment', comment_id: 'C_102_0' },
+			{ action: 'minimize_comment', comment_id: 'C_102_1' }
+		]);
+		expect(sent).toHaveLength(outboxIds.length);
+	});
+
 	it('dismisses without touching GitHub, remembering the score', async () => {
 		const caseId = await seedCase(db, { installationId: 10, userId: 101 });
 		const { decisionId } = await recordDecision(db, queue, {

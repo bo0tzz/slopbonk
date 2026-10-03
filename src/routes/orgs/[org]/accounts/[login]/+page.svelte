@@ -154,10 +154,23 @@
 						<Text size="small">
 							<b>{decision.action}</b> by {decision.actor}<br />
 							<span class="text-light-600">{when(decision.decidedAt)}</span>
-							{#if decision.outcome?.status === 'pending'}
+							{#if decision.block?.status === 'pending'}
 								<br /><span class="text-light-600">Waiting to be carried out on GitHub</span>
-							{:else if decision.outcome?.status === 'failed'}
-								<br /><span class="text-danger">Failed on GitHub: {decision.outcome.error}</span>
+							{:else if decision.block?.status === 'failed'}
+								<br /><span class="text-danger">Failed on GitHub: {decision.block.error}</span>
+							{/if}
+							{#if decision.hidden}
+								{@const comments = `${decision.hidden.total} comment${decision.hidden.total === 1 ? '' : 's'}`}
+								<br />
+								{#if decision.hidden.status === 'done'}
+									<span class="text-light-600">Hid {comments}</span>
+								{:else if decision.hidden.status === 'pending'}
+									<span class="text-light-600">Hiding {comments}</span>
+								{:else}
+									<span class="text-danger">
+										Couldn't hide all {comments}: {decision.hidden.error}
+									</span>
+								{/if}
 							{/if}
 						</Text>
 					{:else}

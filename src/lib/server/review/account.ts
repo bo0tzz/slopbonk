@@ -26,6 +26,11 @@ export interface EvidenceComment {
 	answerable: boolean;
 }
 
+export interface ActionOutcome {
+	status: OutboxStatus;
+	error: string | null;
+}
+
 export interface AccountEvidence {
 	login: string;
 	accountCreatedAt: Date | null;
@@ -45,8 +50,9 @@ export interface AccountEvidence {
 		action: string;
 		actor: string;
 		decidedAt: Date;
-		/** Whether the decision's GitHub action has been carried out; null when there is none. */
-		outcome: { status: OutboxStatus; error: string | null } | null;
+		/** How far the decision's GitHub actions have got; null for a block not asked for. */
+		block: ActionOutcome | null;
+		hidden: (ActionOutcome & { total: number }) | null;
 	}[];
 	reportUrl: string;
 	reportSummary: string;
@@ -144,17 +150,21 @@ export async function accountEvidence(
 	const decisions = await db
 		.selectFrom('decisions')
 		.innerJoin('github_users', 'github_users.id', 'decisions.actor_id')
-		.leftJoin('outbox', 'outbox.decision_id', 'decisions.id')
-		.select([
-			'decisions.action',
-			'decisions.decided_at',
-			'github_users.login',
-			'outbox.status',
-			'outbox.last_error'
-		])
+		.select(['decisions.id', 'decisions.action', 'decisions.decided_at', 'github_users.login'])
 		.where('decisions.case_id', '=', found.case_id)
 		.orderBy('decisions.decided_at', 'desc')
 		.execute();
+	const outbox = decisions.length
+		? await db
+				.selectFrom('outbox')
+				.select(['decision_id', 'action', 'status', 'last_error'])
+				.where(
+					'decision_id',
+					'in',
+					decisions.map((d) => d.id)
+				)
+				.execute()
+		: [];
 
 	return {
 		login: found.login,
@@ -170,14 +180,32 @@ export async function accountEvidence(
 		commentsHere,
 		activity: dailyActivity(outward, now),
 		burst,
-		decisions: decisions.map((d) => ({
-			action: d.action,
-			actor: d.login,
-			decidedAt: new Date(d.decided_at),
-			outcome: d.status ? { status: d.status, error: d.last_error } : null
-		})),
+		decisions: decisions.map((d) => {
+			const items = outbox.filter((item) => item.decision_id === d.id);
+			const block = items.find((item) => item.action === 'block_user');
+			const hides = items.filter((item) => item.action === 'minimize_comment');
+			return {
+				action: d.action,
+				actor: d.login,
+				decidedAt: new Date(d.decided_at),
+				block: block ? { status: block.status, error: block.last_error } : null,
+				hidden: hides.length ? { total: hides.length, ...overall(hides) } : null
+			};
+		}),
 		reportUrl: reportUrl(found.login),
 		reportSummary: summary(found.login, installation.login, shown, burst)
+	};
+}
+
+/** Pending until all are done; failed, with the first error, if any failed. */
+function overall(items: { status: OutboxStatus; last_error: string | null }[]): ActionOutcome {
+	const failed = items.find((item) => item.status === 'failed');
+	if (failed) {
+		return { status: 'failed', error: failed.last_error };
+	}
+	return {
+		status: items.every((item) => item.status === 'done') ? 'done' : 'pending',
+		error: null
 	};
 }
 

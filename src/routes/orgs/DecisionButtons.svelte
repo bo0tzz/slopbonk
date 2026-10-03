@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, ConfirmModal, HStack } from '@immich/ui';
+	import { Button, Checkbox, ConfirmModal, HStack, Label } from '@immich/ui';
 	import { decide } from './review.remote';
 
 	interface Props {
@@ -16,6 +16,7 @@
 	const dismissForm = $derived(decide.for(`dismiss-${caseId}`));
 	const blockForm = $derived(decide.for(`block-${caseId}`));
 	let confirming = $state(false);
+	let hideComments = $state(true);
 	let blockElement = $state<HTMLFormElement>();
 </script>
 
@@ -32,6 +33,7 @@
 			<input type="hidden" name="org" value={org} />
 			<input type="hidden" name="caseId" value={caseId} />
 			<input type="hidden" name="action" value="block" />
+			<input type="hidden" name="hideComments" value={hideComments ? 'yes' : 'no'} />
 			<input type="hidden" name="then" value={then} />
 			<Button type="button" {size} color="danger" onclick={() => (confirming = true)}>Block</Button>
 		</form>
@@ -41,7 +43,8 @@
 {#if confirming}
 	<ConfirmModal
 		title="Block {login}?"
-		prompt="They'll be blocked from all of {org}'s repositories."
+		icon={false}
+		prompt={blockPrompt}
 		confirmText="Block"
 		confirmColor="danger"
 		onClose={(confirmed) => {
@@ -50,3 +53,11 @@
 		}}
 	/>
 {/if}
+
+{#snippet blockPrompt()}
+	<p>They'll be blocked from all of {org}'s repositories.</p>
+	<div class="mt-4 flex items-center gap-2">
+		<Checkbox id="hide-comments-{caseId}" bind:checked={hideComments} />
+		<Label for="hide-comments-{caseId}">Also hide their comments in {org}</Label>
+	</div>
+{/snippet}

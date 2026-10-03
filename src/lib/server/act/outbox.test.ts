@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDb, type Db } from '../db';
 import { migrateToLatest } from '../db/migrate';
 import type { GithubActions } from '../github/actions';
+import { RateLimitedError } from '../github/rate-limit';
 import { createTestDatabase } from '../testing/database';
 import { seedCase } from '../testing/fixtures';
 import { carryOut, requeuePending } from './outbox';
@@ -15,6 +16,11 @@ describe('carryOut', () => {
 		async blockUser(org, login) {
 			if (failWith) throw failWith;
 			calls.push(`block ${org} ${login}`);
+		},
+		async minimizeComment(commentId) {
+			if (failWith) throw failWith;
+			calls.push(`hide ${commentId}`);
+			return true;
 		}
 	};
 	const actionsFor = async () => actions;
@@ -35,7 +41,8 @@ describe('carryOut', () => {
 	async function item(
 		installationId: number,
 		userId: number,
-		accountType: 'Organization' | 'User' = 'Organization'
+		accountType: 'Organization' | 'User' = 'Organization',
+		hide?: string
 	) {
 		const caseId = await seedCase(db, { installationId, accountType, userId, comments: 1 });
 		const { id: decisionId } = await db
@@ -48,8 +55,9 @@ describe('carryOut', () => {
 			.values({
 				decision_id: decisionId,
 				installation_id: installationId,
-				action: 'block_user',
-				target_user_id: userId
+				action: hide ? 'minimize_comment' : 'block_user',
+				target_user_id: userId,
+				comment_id: hide ?? null
 			})
 			.returning('id')
 			.executeTakeFirstOrThrow();
@@ -93,6 +101,21 @@ describe('carryOut', () => {
 		const before = calls.length;
 		await carryOut(db, actionsFor, id, false);
 		expect(calls.length).toBe(before);
+	});
+
+	it('hides a comment', async () => {
+		const id = await item(10, 206, 'Organization', 'C_206_0');
+		await carryOut(db, actionsFor, id, false);
+		expect(calls).toContain('hide C_206_0');
+		expect(await row(id)).toMatchObject({ status: 'done' });
+	});
+
+	it('leaves the item untouched when GitHub is rate limiting, for the job to be deferred', async () => {
+		const id = await item(10, 207);
+		failWith = new RateLimitedError(new Date());
+		await expect(carryOut(db, actionsFor, id, true)).rejects.toBeInstanceOf(RateLimitedError);
+		expect(await row(id)).toEqual({ status: 'pending', attempts: 0, last_error: null });
+		failWith = null;
 	});
 
 	it('requeues pending items', async () => {

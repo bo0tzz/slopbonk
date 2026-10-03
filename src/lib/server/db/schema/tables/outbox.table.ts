@@ -11,11 +11,14 @@ import {
 import { DecisionTable } from './decision.table.js';
 import { InstallationTable } from './installation.table.js';
 
-export type OutboxAction = 'block_user';
+export type OutboxAction = 'block_user' | 'minimize_comment';
 export type OutboxStatus = 'pending' | 'done' | 'failed';
 
 @Table({ name: 'outbox' })
-@Check({ name: 'outbox_action_check', expression: `action IN ('block_user')` })
+@Check({
+	name: 'outbox_action_check',
+	expression: `action IN ('block_user', 'minimize_comment')`
+})
 @Check({ name: 'outbox_status_check', expression: `status IN ('pending', 'done', 'failed')` })
 @Index({ name: 'outbox_pending_idx', columns: ['created_at'], where: `status = 'pending'` })
 export class OutboxTable {
@@ -33,6 +36,9 @@ export class OutboxTable {
 
 	@Column({ type: 'bigint' })
 	target_user_id!: number;
+
+	@Column({ type: 'text', nullable: true })
+	comment_id!: string | null;
 
 	@Column({ type: 'text', default: 'pending' })
 	status!: Generated<OutboxStatus>;

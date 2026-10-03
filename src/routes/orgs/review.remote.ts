@@ -53,10 +53,16 @@ export const decide = form(
 		org: v.string(),
 		caseId: v.pipe(v.string(), v.transform(Number), v.integer()),
 		action: v.picklist(['block', 'dismiss']),
+		hideComments: v.optional(
+			v.pipe(
+				v.picklist(['yes', 'no']),
+				v.transform((value) => value === 'yes')
+			)
+		),
 		/** Where to go afterwards: the next account to review, or back to the queue. */
 		then: v.picklist(['next', 'queue'])
 	}),
-	async ({ org, caseId, action, then }) => {
+	async ({ org, caseId, action, hideComments, then }) => {
 		const { db, queue } = getServices();
 		const { locals } = getRequestEvent();
 		const target = await installation(org);
@@ -65,7 +71,8 @@ export const decide = form(
 				installationId: target.id,
 				caseId,
 				actor: { id: locals.reviewer!.id, login: locals.reviewer!.login },
-				action
+				action,
+				hideComments
 			});
 		} catch (cause) {
 			if (cause instanceof DecisionError) {

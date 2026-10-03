@@ -55,8 +55,8 @@ describe('block outcomes', () => {
 		});
 
 		const evidence = await accountEvidence(db, INSTALLATION, 'user-201');
-		expect(evidence?.decisions.map((d) => [d.action, d.outcome])).toEqual([
-			['block', { status: 'failed', error: 'Resource not accessible by integration' }]
+		expect(evidence?.decisions.map((d) => [d.action, d.block, d.hidden])).toEqual([
+			['block', { status: 'failed', error: 'Resource not accessible by integration' }, null]
 		]);
 	});
 });
