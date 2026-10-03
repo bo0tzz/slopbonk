@@ -18,8 +18,9 @@ import {
 	backfillWorker,
 	fetchHistoryWorker
 } from './ingest/workers';
-import { queues } from './jobs';
+import { queues, retentionQueue } from './jobs';
 import { evaluateWorker } from './policy/workers';
+import { retentionWorker } from './retention/workers';
 import { startQueue, type JobQueue } from './queue';
 
 export interface Services {
@@ -47,8 +48,10 @@ export async function startServices(): Promise<Services> {
 		backfillPageWorker({ db, queue, clientFor }),
 		backfillCommentsWorker({ db, queue, clientFor }),
 		evaluateWorker({ db, queue }),
-		outboxWorker({ db, actionsFor })
+		outboxWorker({ db, actionsFor }),
+		retentionWorker({ db })
 	]);
+	await queue.schedule(retentionQueue, '17 3 * * *', {});
 	await requeuePending(db, queue);
 
 	services = { db, queue, clientFor, auth: appAuth(app), webhookSecret: github.webhookSecret };

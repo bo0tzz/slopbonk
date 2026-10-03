@@ -91,11 +91,18 @@ export const outboxQueue = defineQueue<OutboxItem>('act.outbox', {
 	retryBackoff: true
 });
 
+/** Applies the retention rules (ADR-0004); scheduled daily. */
+export const retentionQueue = defineQueue<Record<string, never>>('retention.cleanup', {
+	policy: 'stately',
+	retryBackoff: true
+});
+
 export const queues: QueueDefinition<object>[] = [
 	fetchHistoryQueue,
 	evaluateQueue,
 	backfillQueue,
 	backfillPageQueue,
 	backfillCommentsQueue,
-	outboxQueue
+	outboxQueue,
+	retentionQueue
 ];

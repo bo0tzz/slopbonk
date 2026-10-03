@@ -40,6 +40,11 @@ export class JobQueue {
 		return this.boss.send(queue.name, data, options);
 	}
 
+	/** Sends a job on the cron schedule; a run missed while the app was down is made up once. */
+	schedule<T extends object>(queue: QueueDefinition<T>, cron: string, data: T): Promise<void> {
+		return this.boss.schedule(queue.name, cron, data, { missed: 'once' });
+	}
+
 	stop(): Promise<void> {
 		return this.boss.stop({ graceful: true });
 	}
