@@ -19,7 +19,7 @@ interface Account {
 	databaseId?: number;
 }
 
-interface RepositoryNode {
+export interface RepositoryNode {
 	databaseId: number;
 	id: string;
 	name: string;
@@ -59,6 +59,32 @@ export interface IssueCommentNode {
 	pullRequest: ThreadNode | null;
 }
 
+export type RecentThreadKind = 'discussion' | 'issue' | 'pull_request';
+
+export interface RecentComment {
+	id: string;
+	createdAt: string;
+	lastEditedAt: string | null;
+	/** Only discussion comments can be answers. */
+	isAnswer?: boolean;
+	body: string;
+	authorAssociation: string;
+	author: { __typename: string; login: string; id?: string; databaseId?: number } | null;
+}
+
+export interface RecentThread extends ThreadNode {
+	updatedAt: string;
+	category?: { name: string; isAnswerable: boolean };
+	comments: RecentComment[];
+}
+
+/** A repository's threads, most recently updated first; `cursor` fetches the next page. */
+export interface ThreadPage {
+	threads: RecentThread[];
+	cursor: string | null;
+	hasMore: boolean;
+}
+
 /** Newest-first page of a user's comments; `cursor` fetches the next (older) page. */
 export interface HistoryPage<T> {
 	nodes: T[];
@@ -74,6 +100,13 @@ export interface GithubClient {
 		cursor: string | null
 	): Promise<HistoryPage<DiscussionCommentNode>>;
 	issueComments(login: string, cursor: string | null): Promise<HistoryPage<IssueCommentNode>>;
+	installationRepositories(): Promise<RepositoryNode[]>;
+	/** Each thread carries only its latest 100 top-level comments. */
+	recentThreads(
+		kind: RecentThreadKind,
+		repository: { owner: string; name: string },
+		cursor: string | null
+	): Promise<ThreadPage>;
 }
 
 const ACCOUNT = 'login ... on User { databaseId } ... on Organization { databaseId }';
@@ -105,6 +138,33 @@ const ISSUE_COMMENTS = `query($login: String!, $cursor: String) {
 		}
 	}
 }`;
+
+const RECENT_THREAD_FIELDS: Record<RecentThreadKind, [connection: string, fields: string]> = {
+	discussion: ['discussions', 'category { name isAnswerable }'],
+	issue: ['issues', ''],
+	pull_request: ['pullRequests', '']
+};
+
+function recentThreadsQuery(kind: RecentThreadKind): string {
+	const [connection, fields] = RECENT_THREAD_FIELDS[kind];
+	const answer = kind === 'discussion' ? 'isAnswer' : '';
+	return `query($owner: String!, $name: String!, $cursor: String) {
+	repository(owner: $owner, name: $name) {
+		${connection}(first: 25, after: $cursor, orderBy: { field: UPDATED_AT, direction: DESC }) {
+			pageInfo { endCursor hasNextPage }
+			nodes {
+				${THREAD} updatedAt ${fields}
+				comments(last: 100) {
+					nodes {
+						id createdAt lastEditedAt body authorAssociation ${answer}
+						author { __typename login ... on User { id databaseId } }
+					}
+				}
+			}
+		}
+	}
+}`;
+}
 
 interface Connection<T> {
 	pageInfo: { startCursor: string | null; hasPreviousPage: boolean };
@@ -274,6 +334,56 @@ export async function installationClient(app: App, installationId: number): Prom
 				user: { issueComments: Connection<IssueCommentNode> } | null;
 			}>(octokit, ISSUE_COMMENTS, { login, cursor });
 			return toPage(data.user?.issueComments);
+		},
+		async installationRepositories() {
+			const repositories: RepositoryNode[] = [];
+			for (let page = 1; ; page++) {
+				const { data } = await octokit.request('GET /installation/repositories', {
+					per_page: 100,
+					page
+				});
+				repositories.push(
+					...data.repositories.map((repository) => ({
+						databaseId: Number(repository.id),
+						id: repository.node_id,
+						name: repository.name,
+						owner: { login: repository.owner.login, databaseId: Number(repository.owner.id) }
+					}))
+				);
+				if (data.repositories.length < 100) {
+					return repositories;
+				}
+			}
+		},
+		async recentThreads(kind, repository, cursor) {
+			type Node = Omit<RecentThread, 'comments'> & {
+				comments: { nodes: (RecentComment | null)[] };
+			};
+			const [connection] = RECENT_THREAD_FIELDS[kind];
+			const data = await graphqlAllowingPartial<{
+				repository: Record<
+					string,
+					{ pageInfo: { endCursor: string | null; hasNextPage: boolean }; nodes: (Node | null)[] }
+				> | null;
+			}>(octokit, recentThreadsQuery(kind), {
+				owner: repository.owner,
+				name: repository.name,
+				cursor
+			});
+			const threads = data.repository?.[connection];
+			if (!threads) {
+				return { threads: [], cursor: null, hasMore: false };
+			}
+			return {
+				threads: threads.nodes
+					.filter((node): node is Node => node !== null)
+					.map((node) => ({
+						...node,
+						comments: node.comments.nodes.filter((c): c is RecentComment => c !== null)
+					})),
+				cursor: threads.pageInfo.endCursor,
+				hasMore: threads.pageInfo.hasNextPage
+			};
 		}
 	};
 }

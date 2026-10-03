@@ -90,7 +90,7 @@ describe('webhook ingest', () => {
 		expect(sent).toEqual([]);
 	});
 
-	it('records an installation and its account type', async () => {
+	it('records an installation and queues its backfill', async () => {
 		const response = await deliver('installation', {
 			action: 'created',
 			installation: { id: 10, account: owner }
@@ -107,6 +107,7 @@ describe('webhook ingest', () => {
 			account_type: 'Organization',
 			uninstalled_at: null
 		});
+		expect(sent).toEqual([{ queue: 'ingest.backfill', data: { installationId: 10 }, key: '10' }]);
 	});
 
 	it('stores a discussion comment and queues an evaluation', async () => {

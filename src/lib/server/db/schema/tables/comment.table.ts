@@ -11,10 +11,13 @@ import {
 import { GithubUserTable } from './github-user.table.js';
 import { ThreadTable } from './thread.table.js';
 
-export type CommentSource = 'webhook' | 'history';
+export type CommentSource = 'webhook' | 'backfill' | 'history';
 
 @Table({ name: 'comments' })
-@Check({ name: 'comments_source_check', expression: `source IN ('webhook', 'history')` })
+@Check({
+	name: 'comments_source_check',
+	expression: `source IN ('webhook', 'backfill', 'history')`
+})
 @Index({ name: 'comments_author_created_idx', columns: ['author_id', 'created_at'] })
 export class CommentTable {
 	@PrimaryColumn({ type: 'text' })

@@ -21,6 +21,40 @@ export const evaluateQueue = defineQueue<AccountInInstallation>('policy.evaluate
 	policy: 'stately'
 });
 
+export interface InstallationJob {
+	installationId: number;
+}
+
+/** Lists the installation's repositories and queues the first page of each kind of thread. */
+export const backfillQueue = defineQueue<InstallationJob>('ingest.backfill', {
+	policy: 'stately',
+	retryBackoff: true
+});
+
+export interface BackfillPage {
+	installationId: number;
+	repository: { id: number; owner: string; name: string };
+	kind: 'discussion' | 'issue' | 'pull_request';
+	cursor: string | null;
+	/** ISO timestamp, fixed when the backfill starts so retries and later pages share one window. */
+	since: string;
+}
+
+export function backfillPageKey({
+	installationId,
+	repository,
+	kind,
+	cursor
+}: BackfillPage): string {
+	return `${installationId}:${repository.id}:${kind}:${cursor ?? 'first'}`;
+}
+
+/** One page of a repository's recently updated threads; queues the next page itself. */
+export const backfillPageQueue = defineQueue<BackfillPage>('ingest.backfill-page', {
+	policy: 'stately',
+	retryBackoff: true
+});
+
 export interface OutboxItem {
 	outboxId: number;
 }
@@ -33,4 +67,10 @@ export const outboxQueue = defineQueue<OutboxItem>('act.outbox', {
 	retryBackoff: true
 });
 
-export const queues: QueueDefinition<object>[] = [fetchHistoryQueue, evaluateQueue, outboxQueue];
+export const queues: QueueDefinition<object>[] = [
+	fetchHistoryQueue,
+	evaluateQueue,
+	backfillQueue,
+	backfillPageQueue,
+	outboxQueue
+];

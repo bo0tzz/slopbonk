@@ -1,8 +1,8 @@
 import { Webhooks, type EmitterWebhookEvent } from '@octokit/webhooks';
 import type { Db } from '../db';
 import type { JobSender } from '../queue';
-import { evaluateQueue, jobKey } from '../jobs';
-import { storeComment, storeRepository, storeThread } from './store';
+import { backfillQueue, evaluateQueue, jobKey } from '../jobs';
+import { storeComment, storeRepository, storeThread, storeUser } from './store';
 
 interface Deps {
 	db: Db;
@@ -26,7 +26,12 @@ export async function handleWebhookRequest(request: Request, deps: Deps): Promis
 		return new Response('Invalid signature', { status: 401 });
 	}
 
-	webhooks.on(['installation.created', 'installation.unsuspend'], (event) =>
+	webhooks.on('installation.created', async (event) => {
+		await recordInstallation(deps.db, event.payload.installation);
+		const job = { installationId: event.payload.installation.id };
+		await deps.queue.send(backfillQueue, job, { singletonKey: String(job.installationId) });
+	});
+	webhooks.on('installation.unsuspend', (event) =>
 		recordInstallation(deps.db, event.payload.installation)
 	);
 	webhooks.on(['installation.deleted', 'installation.suspend'], (event) =>
@@ -87,11 +92,7 @@ async function recordComment({ db, queue }: Deps, event: CommentEvent) {
 	});
 
 	const author = comment.user;
-	await db
-		.insertInto('github_users')
-		.values({ id: author.id, node_id: author.node_id, login: author.login })
-		.onConflict((oc) => oc.column('id').doUpdateSet({ login: author.login }))
-		.execute();
+	await storeUser(db, { id: author.id, node_id: author.node_id, login: author.login });
 
 	await storeRepository(db, {
 		id: repository.id,

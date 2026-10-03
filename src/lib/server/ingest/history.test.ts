@@ -3,12 +3,12 @@ import { createDb, type Db } from '../db';
 import { migrateToLatest } from '../db/migrate';
 import type {
 	DiscussionCommentNode,
-	GithubClient,
 	HistoryPage,
 	IssueCommentNode,
 	UserProfile
 } from '../github/client';
 import { createTestDatabase } from '../testing/database';
+import { fakeGithubClient } from '../testing/github';
 import { fetchHistory } from './history';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -74,7 +74,7 @@ function fakeClient(
 ) {
 	const calls = { getUser: 0, discussionPages: 0 };
 	const discussionPages = paged(discussions, 2);
-	const client: GithubClient = {
+	const client = fakeGithubClient({
 		async getUser() {
 			calls.getUser++;
 			return profile;
@@ -84,7 +84,7 @@ function fakeClient(
 			return discussionPages(cursor);
 		},
 		issueComments: async (_login, cursor) => paged(issues, 2)(cursor)
-	};
+	});
 	return { client, calls };
 }
 

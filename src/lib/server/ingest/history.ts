@@ -6,7 +6,7 @@ import type {
 	HistoryPage,
 	IssueCommentNode
 } from '../github/client';
-import { storeComment, storeRepository, storeThread, type RepositoryRecord } from './store';
+import { repositoryRecord, storeComment, storeRepository, storeThread } from './store';
 
 /** Overlap with the previous fetch, so comments posted while it ran aren't missed. */
 const INCREMENTAL_OVERLAP_MS = 24 * 60 * 60 * 1000;
@@ -103,24 +103,6 @@ async function collect<T extends { createdAt: string }>(
 		}
 		cursor = page.cursor;
 	}
-}
-
-function repositoryRecord(repository: {
-	databaseId: number;
-	id: string;
-	name: string;
-	owner: { login: string; databaseId?: number };
-}): RepositoryRecord | null {
-	if (repository.owner.databaseId === undefined) {
-		return null;
-	}
-	return {
-		id: repository.databaseId,
-		node_id: repository.id,
-		owner_id: repository.owner.databaseId,
-		owner_login: repository.owner.login,
-		name: repository.name
-	};
 }
 
 async function storeDiscussionComment(db: Db, userId: number, node: DiscussionCommentNode) {

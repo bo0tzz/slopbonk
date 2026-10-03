@@ -1,4 +1,5 @@
 import type { Db } from '../db';
+import type { RepositoryNode } from '../github/client';
 import type { CommentSource } from '../db/schema/tables/comment.table';
 import type { ThreadKind } from '../db/schema/tables/thread.table';
 
@@ -31,6 +32,30 @@ export interface CommentRecord {
 	created_at: string;
 	edited_at: string | null;
 	source: CommentSource;
+}
+
+export function repositoryRecord(repository: RepositoryNode): RepositoryRecord | null {
+	if (repository.owner.databaseId === undefined) {
+		return null;
+	}
+	return {
+		id: repository.databaseId,
+		node_id: repository.id,
+		owner_id: repository.owner.databaseId,
+		owner_login: repository.owner.login,
+		name: repository.name
+	};
+}
+
+export async function storeUser(
+	db: Db,
+	user: { id: number; node_id: string | undefined; login: string }
+) {
+	await db
+		.insertInto('github_users')
+		.values(user)
+		.onConflict((oc) => oc.column('id').doUpdateSet({ login: user.login }))
+		.execute();
 }
 
 export async function storeRepository(db: Db, repository: RepositoryRecord) {
