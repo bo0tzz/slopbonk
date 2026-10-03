@@ -5,14 +5,14 @@ export class GithubUserTable {
 	@PrimaryColumn({ type: 'bigint' })
 	id!: number;
 
-	@Column({ type: 'text', unique: true })
-	node_id!: string;
+	@Column({ type: 'text', unique: true, nullable: true })
+	node_id!: string | null;
 
 	@Column({ type: 'text' })
 	login!: string;
 
-	@Column({ type: 'timestamp with time zone' })
-	account_created_at!: Timestamp;
+	@Column({ type: 'timestamp with time zone', nullable: true })
+	account_created_at!: Timestamp | null;
 
 	@Column({ type: 'text', nullable: true })
 	name!: string | null;

@@ -1,3 +1,4 @@
+import { NO_MIGRATIONS } from 'kysely/migration';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestDatabase } from '../testing/database';
 import { createDb, type Db } from '.';
@@ -76,7 +77,13 @@ describe('migrations', () => {
 	it('requires exactly one outbox target', async () => {
 		await db
 			.insertInto('installations')
-			.values({ id: 10, org_id: 20, org_login: 'org', config: '{}' })
+			.values({
+				id: 10,
+				account_id: 20,
+				account_login: 'org',
+				account_type: 'Organization',
+				config: '{}'
+			})
 			.execute();
 		const { id: caseId } = await db
 			.insertInto('cases')
@@ -103,7 +110,7 @@ describe('migrations', () => {
 	});
 
 	it('migrates down cleanly', async () => {
-		const { error } = await migrator(db).migrateDown();
+		const { error } = await migrator(db).migrateTo(NO_MIGRATIONS);
 		expect(error).toBeUndefined();
 		expect(await tableNames()).toEqual([]);
 	});
