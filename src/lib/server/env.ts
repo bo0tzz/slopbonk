@@ -12,9 +12,12 @@ export function databaseUrl(): string {
 	return required('DATABASE_URL');
 }
 
-/** Public URL of this instance, without trailing slash; GitHub redirects reviewers back to it. */
+/**
+ * Public URL of this instance, without trailing slash; GitHub redirects reviewers back to it. The
+ * same variable tells adapter-node which origin requests arrive on.
+ */
 export function baseUrl(): string {
-	return required('BASE_URL').replace(/\/$/, '');
+	return required('ORIGIN').replace(/\/$/, '');
 }
 
 export interface GithubAppConfig {

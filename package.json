@@ -3,6 +3,7 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
+	"packageManager": "pnpm@12.6.0",
 	"scripts": {
 		"prepare": "svelte-kit sync || echo ''"
 	},
@@ -28,6 +29,7 @@
 		"tailwindcss": "^4.3.0",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.60.1",
+		"valibot": "^1.5.0",
 		"vite": "^8.3.0",
 		"vitest": "^4.1.8"
 	},
@@ -37,7 +39,6 @@
 		"@octokit/webhooks": "^14.2.0",
 		"kysely": "^0.29.6",
 		"pg": "^8.23.1",
-		"pg-boss": "^12.35.1",
-		"valibot": "^1.5.0"
+		"pg-boss": "^12.35.1"
 	}
 }
