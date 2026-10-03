@@ -12,7 +12,7 @@
 		"@immich/sql-tools": "^0.6.4",
 		"@immich/ui": "^0.90.0",
 		"@mdi/js": "^7.4.47",
-		"@sveltejs/adapter-node": "^5.5.7",
+		"@sveltejs/adapter-node": "^6.0.0",
 		"@sveltejs/kit": "^2.70.3",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@tailwindcss/vite": "^4.3.0",
