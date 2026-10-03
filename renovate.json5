@@ -3,6 +3,8 @@
 	// Every dependency bump is a fix, so it cuts a release and deployed images keep up.
 	extends: ['config:recommended', ':semanticCommits', ':semanticCommitTypeAll(fix)'],
 	pinDigests: true,
+	// pnpm refuses packages younger than a day (minimumReleaseAge), so CI would fail on anything newer.
+	minimumReleaseAge: '1 day',
 	rebaseWhen: 'conflicted',
 	packageRules: [
 		{
