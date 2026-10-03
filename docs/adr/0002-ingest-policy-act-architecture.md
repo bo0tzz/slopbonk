@@ -1,6 +1,6 @@
 # 2. Separate ingest, policy and act components, with policy working only on our database
 
-- Status: accepted
+- Status: accepted; "Reviewer sessions" superseded by ADR-0008
 - Date: 2026-10-02
 
 ## Context
