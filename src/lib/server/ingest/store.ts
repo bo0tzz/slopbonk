@@ -1,5 +1,5 @@
 import type { Db } from '../db';
-import type { RepositoryNode } from '../github/client';
+import type { RepositoryNode } from '../github/reads';
 import type { CommentSource } from '../db/schema/tables/comment.table';
 import type { ThreadKind } from '../db/schema/tables/thread.table';
 

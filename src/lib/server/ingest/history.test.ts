@@ -6,7 +6,7 @@ import type {
 	HistoryPage,
 	IssueCommentNode,
 	UserProfile
-} from '../github/client';
+} from '../github/reads';
 import { createTestDatabase } from '../testing/database';
 import { fakeGithubClient } from '../testing/github';
 import { fetchHistory } from './history';

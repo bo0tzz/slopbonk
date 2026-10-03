@@ -1,6 +1,17 @@
-// The jobs that ingest, policy and act send each other. Components depend on these contracts,
-// never on each other's modules.
-import { defineQueue, type QueueDefinition } from './queue';
+import { defineQueue, type QueueDefinition, type QueueOptions } from './queue';
+
+/** Rides out a GitHub outage of up to about half an hour. Rate limits defer jobs instead. */
+const GITHUB_RETRIES = {
+	retryLimit: 5,
+	retryDelay: 30,
+	retryBackoff: true,
+	retryDelayMax: 60 * 60
+} satisfies QueueOptions;
+
+const LOCAL_RETRIES = { retryLimit: 3, retryDelay: 5, retryBackoff: true } satisfies QueueOptions;
+
+/** One installation's GitHub calls go one at a time, as GitHub asks of each token. */
+const byInstallation = ({ installationId }: { installationId: number }) => String(installationId);
 
 export interface AccountInInstallation {
 	installationId: number;
@@ -12,13 +23,16 @@ export function jobKey({ installationId, userId }: AccountInInstallation): strin
 }
 
 /** Keyed per installation, so each requester gets its follow-up evaluation; freshness avoids refetching. */
-export const fetchHistoryQueue = defineQueue<AccountInInstallation>('ingest.fetch-history', {
-	policy: 'stately'
-});
+export const fetchHistoryQueue = defineQueue<AccountInInstallation>(
+	'ingest.fetch-history',
+	{ policy: 'stately', ...GITHUB_RETRIES },
+	byInstallation
+);
 
 /** One queued evaluation per account and installation at a time; repeats are dropped. */
 export const evaluateQueue = defineQueue<AccountInInstallation>('policy.evaluate', {
-	policy: 'stately'
+	policy: 'stately',
+	...LOCAL_RETRIES
 });
 
 export interface InstallationJob {
@@ -26,10 +40,11 @@ export interface InstallationJob {
 }
 
 /** Lists the installation's repositories and queues the first page of each kind of thread. */
-export const backfillQueue = defineQueue<InstallationJob>('ingest.backfill', {
-	policy: 'stately',
-	retryBackoff: true
-});
+export const backfillQueue = defineQueue<InstallationJob>(
+	'ingest.backfill',
+	{ policy: 'stately', ...GITHUB_RETRIES },
+	byInstallation
+);
 
 export interface BackfillPage {
 	installationId: number;
@@ -50,10 +65,11 @@ export function backfillPageKey({
 }
 
 /** One page of a repository's recently updated threads; queues the next page itself. */
-export const backfillPageQueue = defineQueue<BackfillPage>('ingest.backfill-page', {
-	policy: 'stately',
-	retryBackoff: true
-});
+export const backfillPageQueue = defineQueue<BackfillPage>(
+	'ingest.backfill-page',
+	{ policy: 'stately', ...GITHUB_RETRIES },
+	byInstallation
+);
 
 export interface BackfillComments {
 	installationId: number;
@@ -74,27 +90,26 @@ export function backfillCommentsKey({
 }
 
 /** Comments a thread page didn't include: older ones, and discussion replies. */
-export const backfillCommentsQueue = defineQueue<BackfillComments>('ingest.backfill-comments', {
-	policy: 'stately',
-	retryBackoff: true
-});
+export const backfillCommentsQueue = defineQueue<BackfillComments>(
+	'ingest.backfill-comments',
+	{ policy: 'stately', ...GITHUB_RETRIES },
+	byInstallation
+);
 
 export interface OutboxItem {
+	installationId: number;
 	outboxId: number;
 }
 
-export const OUTBOX_RETRY_LIMIT = 3;
+export const OUTBOX_RETRY_LIMIT = GITHUB_RETRIES.retryLimit;
 
 /** Carries out one outbox item against GitHub; retried with backoff before the item is marked failed. */
-export const outboxQueue = defineQueue<OutboxItem>('act.outbox', {
-	retryLimit: OUTBOX_RETRY_LIMIT,
-	retryBackoff: true
-});
+export const outboxQueue = defineQueue<OutboxItem>('act.outbox', GITHUB_RETRIES, byInstallation);
 
 /** Applies the retention rules (ADR-0004); scheduled daily. */
 export const retentionQueue = defineQueue<Record<string, never>>('retention.cleanup', {
 	policy: 'stately',
-	retryBackoff: true
+	...LOCAL_RETRIES
 });
 
 export const queues: QueueDefinition<object>[] = [

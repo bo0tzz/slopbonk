@@ -4,7 +4,7 @@ import { dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import { REVIEWER_CACHE_MS } from '../constants';
 import type { Db } from '../db';
-import type { GithubAuth, UserIdentity, UserTokens } from '../github/client';
+import type { GithubAuth, UserIdentity, UserTokens } from '../github/auth';
 
 export const SESSION_COOKIE = 'slopbonk_session';
 

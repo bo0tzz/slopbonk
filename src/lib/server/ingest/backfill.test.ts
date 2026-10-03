@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createDb, type Db } from '../db';
 import { migrateToLatest } from '../db/migrate';
-import type { CommentPage, RecentComment, RecentThread, ThreadPage } from '../github/client';
+import type { CommentPage, RecentComment, RecentThread, ThreadPage } from '../github/reads';
 import type { BackfillComments, BackfillPage } from '../jobs';
 import { createTestDatabase } from '../testing/database';
 import { fakeGithubClient } from '../testing/github';

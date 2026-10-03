@@ -4,12 +4,20 @@ import { defineQueue, startQueue, worker, type JobQueue } from '.';
 
 const echo = defineQueue<{ value: string }>('test.echo');
 const keyed = defineQueue<{ account: number }>('test.keyed', { policy: 'stately' });
+const deferring = defineQueue<{ value: string }>('test.deferring', { retryLimit: 0 });
+
+class NotYet extends Error {
+	constructor(readonly until: Date) {
+		super('not yet');
+	}
+}
 
 describe('job queue', () => {
 	let url: string;
 	let drop: () => Promise<void>;
 	const started: JobQueue[] = [];
 	const received: string[] = [];
+	const attempts: string[] = [];
 	let notify: () => void = () => {};
 
 	beforeAll(async () => {
@@ -22,12 +30,24 @@ describe('job queue', () => {
 	});
 
 	async function start() {
-		const queue = await startQueue(url, [echo, keyed], () => [
-			worker(echo, async (job) => {
-				received.push(job.data.value);
-				notify();
-			})
-		]);
+		const queue = await startQueue(
+			url,
+			[echo, keyed, deferring],
+			() => [
+				worker(echo, async (job) => {
+					received.push(job.data.value);
+					notify();
+				}),
+				worker(deferring, async (job) => {
+					attempts.push(job.id);
+					if (attempts.length === 1) {
+						throw new NotYet(new Date(Date.now() + 500));
+					}
+					notify();
+				})
+			],
+			{ deferUntil: (error) => (error instanceof NotYet ? error.until : null) }
+		);
 		started.push(queue);
 		return queue;
 	}
@@ -53,4 +73,13 @@ describe('job queue', () => {
 		expect(duplicate).toBeNull();
 		expect(other).not.toBeNull();
 	});
+
+	it('runs a deferred job again later instead of failing it', async () => {
+		const [queue] = started;
+		const ranAgain = new Promise<void>((resolve) => (notify = resolve));
+		await queue.send(deferring, { value: 'later' });
+		await ranAgain;
+		expect(attempts).toHaveLength(2);
+		expect(attempts[0]).not.toBe(attempts[1]);
+	}, 15_000);
 });

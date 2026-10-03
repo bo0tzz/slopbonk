@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDb, type Db } from '../db';
 import { migrateToLatest } from '../db/migrate';
-import type { GithubActions } from '../github/client';
+import type { GithubActions } from '../github/actions';
 import { createTestDatabase } from '../testing/database';
 import { seedCase } from '../testing/fixtures';
 import { carryOut, requeuePending } from './outbox';
@@ -99,6 +99,6 @@ describe('carryOut', () => {
 		const id = await item(10, 205);
 		const sent: object[] = [];
 		await requeuePending(db, { send: async (_queue, data) => (sent.push(data), 'job') });
-		expect(sent).toContainEqual({ outboxId: id });
+		expect(sent).toContainEqual({ installationId: 10, outboxId: id });
 	});
 });

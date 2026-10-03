@@ -1,5 +1,5 @@
 import type { Db } from '../db';
-import type { GithubClient } from '../github/client';
+import type { GithubClient } from '../github/reads';
 import { worker, type JobSender } from '../queue';
 import { backfillComments, backfillPage, startBackfill } from './backfill';
 import { fetchHistory } from './history';

@@ -62,7 +62,7 @@ describe('recordDecision', () => {
 			{ action: 'block_user', target_user_id: 100, status: 'pending' }
 		]);
 		expect(sent).toEqual(
-			outboxIds.map((outboxId) => ({ queue: 'act.outbox', data: { outboxId } }))
+			outboxIds.map((outboxId) => ({ queue: 'act.outbox', data: { installationId: 10, outboxId } }))
 		);
 	});
 

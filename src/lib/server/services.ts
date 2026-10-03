@@ -4,14 +4,11 @@ import { migrateToLatest } from './db/migrate';
 import { databaseUrl, githubApp } from './env';
 import { outboxWorker } from './act/workers';
 import { requeuePending } from './act/outbox';
-import {
-	appAuth,
-	createApp,
-	installationActions,
-	installationClient,
-	type GithubAuth,
-	type GithubClient
-} from './github/client';
+import { installationActions } from './github/actions';
+import { createApp } from './github/app';
+import { RateLimitedError } from './github/rate-limit';
+import { installationClient } from './github/reads';
+import { appAuth, type GithubAuth } from './github/auth';
 import {
 	backfillCommentsWorker,
 	backfillPageWorker,
@@ -26,7 +23,6 @@ import { startQueue, type JobQueue } from './queue';
 export interface Services {
 	db: Db;
 	queue: JobQueue;
-	clientFor: (installationId: number) => Promise<GithubClient>;
 	auth: GithubAuth;
 	webhookSecret: string;
 }
@@ -42,19 +38,25 @@ export async function startServices(): Promise<Services> {
 	const db = createDb(databaseUrl());
 	await migrateToLatest(db);
 
-	const queue = await startQueue(databaseUrl(), queues, (queue) => [
-		fetchHistoryWorker({ db, queue, clientFor }),
-		backfillWorker({ db, queue, clientFor }),
-		backfillPageWorker({ db, queue, clientFor }),
-		backfillCommentsWorker({ db, queue, clientFor }),
-		evaluateWorker({ db, queue }),
-		outboxWorker({ db, actionsFor }),
-		retentionWorker({ db })
-	]);
+	const deferUntil = (error: unknown) => (error instanceof RateLimitedError ? error.until : null);
+	const queue = await startQueue(
+		databaseUrl(),
+		queues,
+		(queue) => [
+			fetchHistoryWorker({ db, queue, clientFor }),
+			backfillWorker({ db, queue, clientFor }),
+			backfillPageWorker({ db, queue, clientFor }),
+			backfillCommentsWorker({ db, queue, clientFor }),
+			evaluateWorker({ db, queue }),
+			outboxWorker({ db, actionsFor }),
+			retentionWorker({ db })
+		],
+		{ deferUntil }
+	);
 	await queue.schedule(retentionQueue, '17 3 * * *', {});
 	await requeuePending(db, queue);
 
-	services = { db, queue, clientFor, auth: appAuth(app), webhookSecret: github.webhookSecret };
+	services = { db, queue, auth: appAuth(app), webhookSecret: github.webhookSecret };
 	return services;
 }
 
@@ -66,8 +68,14 @@ export function getServices(): Services {
 }
 
 export async function stopServices(): Promise<void> {
-	if (services) {
-		await services.queue.stop();
-		await services.db.destroy();
+	const stopping = services;
+	services = undefined;
+	if (stopping) {
+		await stopping.queue.stop();
+		await stopping.db.destroy();
 	}
 }
+
+// Effective once the dev server runs server code through Vite's module runner (SvelteKit 3);
+// until then, restart the dev server after server-side changes.
+import.meta.hot?.dispose(stopServices);

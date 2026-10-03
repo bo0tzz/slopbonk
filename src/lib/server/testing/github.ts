@@ -1,4 +1,4 @@
-import type { GithubClient } from '../github/client';
+import type { GithubClient } from '../github/reads';
 
 /** A client whose methods fail unless the test provides them. */
 export function fakeGithubClient(methods: Partial<GithubClient>): GithubClient {

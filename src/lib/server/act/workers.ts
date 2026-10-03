@@ -1,5 +1,5 @@
 import type { Db } from '../db';
-import type { GithubActions } from '../github/client';
+import type { GithubActions } from '../github/actions';
 import { OUTBOX_RETRY_LIMIT, outboxQueue } from '../jobs';
 import { worker } from '../queue';
 import { carryOut } from './outbox';

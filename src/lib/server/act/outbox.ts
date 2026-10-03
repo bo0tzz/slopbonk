@@ -1,5 +1,5 @@
 import type { Db } from '../db';
-import type { GithubActions } from '../github/client';
+import type { GithubActions } from '../github/actions';
 import { outboxQueue } from '../jobs';
 import type { JobSender } from '../queue';
 
@@ -74,10 +74,14 @@ export async function carryOut(
 export async function requeuePending(db: Db, queue: JobSender): Promise<void> {
 	const pending = await db
 		.selectFrom('outbox')
-		.select('id')
+		.select(['id', 'installation_id'])
 		.where('status', '=', 'pending')
 		.execute();
-	for (const { id } of pending) {
-		await queue.send(outboxQueue, { outboxId: id }, { singletonKey: String(id) });
+	for (const { id, installation_id } of pending) {
+		await queue.send(
+			outboxQueue,
+			{ installationId: installation_id, outboxId: id },
+			{ singletonKey: String(id) }
+		);
 	}
 }

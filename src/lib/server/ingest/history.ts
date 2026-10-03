@@ -5,7 +5,7 @@ import type {
 	GithubClient,
 	HistoryPage,
 	IssueCommentNode
-} from '../github/client';
+} from '../github/reads';
 import { repositoryRecord, storeComment, storeRepository, storeThread } from './store';
 
 /** Overlap with the previous fetch, so comments posted while it ran aren't missed. */

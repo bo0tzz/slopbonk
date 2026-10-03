@@ -1,6 +1,6 @@
 import type { Db } from '../db';
 import { INSTALL_BACKFILL_MS } from '../constants';
-import type { CommentPage, GithubClient, RecentComment } from '../github/client';
+import type { CommentPage, GithubClient, RecentComment } from '../github/reads';
 import {
 	backfillCommentsKey,
 	backfillCommentsQueue,

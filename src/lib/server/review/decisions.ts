@@ -95,11 +95,19 @@ export async function recordDecision(
 						.returning('id')
 						.execute()
 				: [];
-		return { decisionId, outboxIds: outbox.map((row) => row.id) };
+		return {
+			decisionId,
+			installationId: target.installation_id,
+			outboxIds: outbox.map((row) => row.id)
+		};
 	});
 
 	for (const outboxId of result.outboxIds) {
-		await queue.send(outboxQueue, { outboxId }, { singletonKey: String(outboxId) });
+		await queue.send(
+			outboxQueue,
+			{ installationId: result.installationId, outboxId },
+			{ singletonKey: String(outboxId) }
+		);
 	}
-	return result;
+	return { decisionId: result.decisionId, outboxIds: result.outboxIds };
 }
