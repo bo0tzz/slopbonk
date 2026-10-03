@@ -74,12 +74,18 @@ export interface CaseUpdate {
 	score: number;
 	firstSeen: Date;
 	lastSeen: Date;
+	/** A case opens once the score reaches this. */
+	openAt: number;
 	/** Reopen a dismissed case when the score reaches the dismissed score plus this. */
 	reopenMargin: number;
 }
 
-/** Stores the evaluation and creates or updates the case, in one transaction. */
-export function saveEvaluation(db: Db, evaluation: EvaluationRecord, update: CaseUpdate) {
+/** Stores the evaluation and creates or updates the case, in one transaction; returns the case. */
+export function saveEvaluation(
+	db: Db,
+	evaluation: EvaluationRecord,
+	update: CaseUpdate
+): Promise<number | null> {
 	return db.transaction().execute(async (tx) => {
 		const { id: evaluationId } = await tx
 			.insertInto('evaluations')
@@ -111,6 +117,9 @@ export function saveEvaluation(db: Db, evaluation: EvaluationRecord, update: Cas
 			.executeTakeFirst();
 
 		if (!existing) {
+			if (update.score < update.openAt) {
+				return null;
+			}
 			const { id } = await tx
 				.insertInto('cases')
 				.values({
@@ -122,7 +131,7 @@ export function saveEvaluation(db: Db, evaluation: EvaluationRecord, update: Cas
 				})
 				.returning('id')
 				.executeTakeFirstOrThrow();
-			return { caseId: id, created: true };
+			return id;
 		}
 
 		const reopen =
@@ -138,6 +147,6 @@ export function saveEvaluation(db: Db, evaluation: EvaluationRecord, update: Cas
 			})
 			.where('id', '=', existing.id)
 			.execute();
-		return { caseId: existing.id, created: false };
+		return existing.id;
 	});
 }

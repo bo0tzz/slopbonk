@@ -3,6 +3,7 @@ import {
 	EXEMPT_ASSOCIATIONS,
 	HISTORY_FRESHNESS_MS,
 	HISTORY_HORIZON_MS,
+	QUEUE_THRESHOLD,
 	RECHECK_OFFSETS_MS,
 	REOPEN_SCORE_MARGIN
 } from '../constants';
@@ -19,7 +20,7 @@ import {
 } from './store';
 
 export type EvaluateResult =
-	'skipped' | 'exempt' | 'awaiting-history' | 'gone' | { score: number; caseId: number };
+	'skipped' | 'exempt' | 'awaiting-history' | 'gone' | { score: number; caseId: number | null };
 
 export async function evaluate(
 	db: Db,
@@ -55,7 +56,8 @@ export async function evaluate(
 	const signals = computeSignals(job.userId, activity);
 	const result = score(ruleset, signals);
 
-	const { caseId, created } = await saveEvaluation(
+	const firstSeen = new Date(tenantComments[0].created_at);
+	const caseId = await saveEvaluation(
 		db,
 		{
 			userId: job.userId,
@@ -68,23 +70,33 @@ export async function evaluate(
 			installationId: job.installationId,
 			userId: job.userId,
 			score: result.total,
-			firstSeen: new Date(tenantComments[0].created_at),
+			firstSeen,
 			lastSeen: new Date(tenantComments[tenantComments.length - 1].created_at),
+			openAt: QUEUE_THRESHOLD,
 			reopenMargin: REOPEN_SCORE_MARGIN
 		}
 	);
-	if (created) {
-		await scheduleRechecks(queue, job, now);
-	}
+	await scheduleRechecks(queue, job, firstSeen, now);
 	return { score: result.total, caseId };
 }
 
-/** Each re-check gets its own key: a shared key would let the queue drop all but the first. */
-async function scheduleRechecks(queue: JobSender, job: AccountInInstallation, now: Date) {
+/**
+ * Re-checks are timed from the account's first comment in the tenant, and only those still ahead
+ * are sent, so every evaluation can send them and the queue keeps one of each.
+ */
+async function scheduleRechecks(
+	queue: JobSender,
+	job: AccountInInstallation,
+	firstSeen: Date,
+	now: Date
+) {
 	for (const offset of RECHECK_OFFSETS_MS) {
-		await queue.send(evaluateQueue, job, {
-			singletonKey: `${jobKey(job)}:recheck:${offset}`,
-			startAfter: new Date(now.getTime() + offset)
-		});
+		const at = new Date(firstSeen.getTime() + offset);
+		if (at > now) {
+			await queue.send(evaluateQueue, job, {
+				singletonKey: `${jobKey(job)}:recheck:${offset}`,
+				startAfter: at
+			});
+		}
 	}
 }

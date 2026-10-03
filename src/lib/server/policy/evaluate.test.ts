@@ -189,19 +189,39 @@ describe('evaluate', () => {
 			'10:5:recheck:86400000',
 			'10:5:recheck:259200000'
 		]);
-		expect(sent[0].startAfter).toEqual(new Date(now.getTime() + 3_600_000));
+		expect(sent[0].startAfter).toEqual(new Date(minutesAgo(5).getTime() + 3_600_000));
 	});
 
-	it('updates the existing case on re-evaluation without scheduling more re-checks', async () => {
-		const result = await evaluate(db, queue, job(5), new Date(now.getTime() + 60_000));
+	it('updates the existing case, and only sends the re-checks still ahead', async () => {
+		const later = new Date(now.getTime() + 2 * 3_600_000);
+		await db
+			.updateTable('tracked_users')
+			.set({ last_fetched_at: later })
+			.where('user_id', '=', 5)
+			.execute();
+		const result = await evaluate(db, queue, job(5), later);
 		expect(result).toMatchObject({ score: 4 });
-		expect(sent).toEqual([]);
+		expect(sent.map((s) => s.key)).toEqual(['10:5:recheck:86400000', '10:5:recheck:259200000']);
 		expect(
 			await db.selectFrom('cases').selectAll().where('user_id', '=', 5).execute()
 		).toHaveLength(1);
 		expect(
 			await db.selectFrom('evaluations').selectAll().where('user_id', '=', 5).execute()
 		).toHaveLength(2);
+	});
+
+	it('records the evaluation but opens no case below the threshold', async () => {
+		await account(7, { repos: 1 });
+		expect(await evaluate(db, queue, job(7), now)).toEqual({ score: 1, caseId: null });
+		expect(await db.selectFrom('cases').selectAll().where('user_id', '=', 7).execute()).toEqual([]);
+		expect(
+			await db.selectFrom('evaluations').selectAll().where('user_id', '=', 7).execute()
+		).toHaveLength(1);
+		expect(sent.map((s) => s.key)).toEqual([
+			'10:7:recheck:3600000',
+			'10:7:recheck:86400000',
+			'10:7:recheck:259200000'
+		]);
 	});
 
 	it('reopens a dismissed case only when the score rises past the dismissal', async () => {
