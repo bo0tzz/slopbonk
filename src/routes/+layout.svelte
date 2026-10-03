@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { resolve } from '$app/paths';
-	import { Button, HStack, Heading, Text } from '@immich/ui';
+	import { Button, HStack, Heading, Text, ThemeSwitcher } from '@immich/ui';
 	import { currentReviewer } from './session.remote';
 
 	let { children } = $props();
@@ -13,7 +13,7 @@
 	<title>slopbonk</title>
 </svelte:head>
 
-<header class="border-b border-gray-200 px-6 py-3 dark:border-gray-800">
+<header class="border-b border-light-200 px-6 py-3">
 	<HStack class="justify-between">
 		<a href={resolve('/')}>
 			<HStack>
@@ -21,14 +21,15 @@
 				<Heading size="small">slopbonk</Heading>
 			</HStack>
 		</a>
-		{#if reviewer}
-			<HStack>
+		<HStack>
+			{#if reviewer}
 				<Text size="small">{reviewer.login}</Text>
 				<form method="POST" action={resolve('/auth/logout')}>
 					<Button type="submit" size="small" variant="ghost">Sign out</Button>
 				</form>
-			</HStack>
-		{/if}
+			{/if}
+			<ThemeSwitcher size="small" />
+		</HStack>
 	</HStack>
 </header>
 

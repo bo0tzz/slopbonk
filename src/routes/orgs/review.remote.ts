@@ -2,7 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { form, getRequestEvent, query } from '$app/server';
 import { installationForReviewer } from '$lib/server/auth/access';
-import { accountEvidence, describeRule } from '$lib/server/review/account';
+import { accountEvidence, describeRule, stats } from '$lib/server/review/account';
 import { DecisionError, recordDecision } from '$lib/server/review/decisions';
 import { listQueue, nextToReview, queueCounts } from '$lib/server/review/queue';
 import { getServices } from '$lib/server/services';
@@ -27,13 +27,9 @@ export const orgQueue = query(
 		]);
 		return {
 			org: target.login,
+			canBlock: target.accountType === 'Organization',
 			counts,
-			entries: entries.map((entry) => ({
-				...entry,
-				reasons: Object.entries(entry.signals).map(([signal, value]) =>
-					describeRule(signal as Parameters<typeof describeRule>[0], value)
-				)
-			}))
+			entries: entries.map(({ signals, ...entry }) => ({ ...entry, stats: stats(signals) }))
 		};
 	}
 );
@@ -50,6 +46,7 @@ export const flaggedAccount = query(
 			org: target.login,
 			canBlock: target.accountType === 'Organization',
 			...evidence,
+			stats: stats(Object.fromEntries(evidence.rules.map((rule) => [rule.signal, rule.value]))),
 			rules: evidence.rules.map((rule) => ({
 				...rule,
 				description: describeRule(rule.signal, rule.value)
@@ -62,9 +59,11 @@ export const decide = form(
 	v.object({
 		org: v.string(),
 		caseId: v.pipe(v.string(), v.transform(Number), v.integer()),
-		action: v.picklist(['block', 'dismiss'])
+		action: v.picklist(['block', 'dismiss']),
+		/** Where to go afterwards: the next account to review, or back to the queue. */
+		then: v.picklist(['next', 'queue'])
 	}),
-	async ({ org, caseId, action }) => {
+	async ({ org, caseId, action, then }) => {
 		const { db, queue } = getServices();
 		const { locals } = getRequestEvent();
 		const target = await installation(org);
@@ -81,7 +80,7 @@ export const decide = form(
 			}
 			throw cause;
 		}
-		const next = await nextToReview(db, target, caseId);
+		const next = then === 'next' ? await nextToReview(db, target, caseId) : null;
 		redirect(303, next ? `/orgs/${target.login}/accounts/${next}` : `/orgs/${target.login}`);
 	}
 );

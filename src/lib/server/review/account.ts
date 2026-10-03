@@ -239,6 +239,39 @@ function summary(
 	return lines.join('\n');
 }
 
+export interface Stat {
+	signal: SignalName;
+	value: string;
+	label: string;
+	fired: boolean;
+}
+
+/** The ruleset's signals as short tiles, in rule order, marking those that counted towards the score. */
+export function stats(values: Partial<Record<SignalName, number>>): Stat[] {
+	const signals = values as Record<SignalName, number>;
+	const fired = new Set(
+		score(
+			RULESET,
+			Object.entries(signals).map(([name, value]) => ({
+				name: name as SignalName,
+				version: 1,
+				value
+			}))
+		).fired.map((rule) => rule.signal)
+	);
+	return RULESET.rules.map(({ signal }) => {
+		const value = signals[signal] ?? 0;
+		const percent = `${Math.round(value * 100)}%`;
+		const [shown, label] = {
+			peak_repos_24h: [String(value), 'repos within 24h'],
+			peak_repos_1m: [String(value), 'repos within a minute'],
+			qa_share: [percent, 'answers overall'],
+			qa_share_burst: [percent, 'answers in a burst']
+		}[signal];
+		return { signal, value: shown, label, fired: fired.has(signal) };
+	});
+}
+
 export function describeRule(signal: SignalName, value: number): string {
 	switch (signal) {
 		case 'peak_repos_24h':

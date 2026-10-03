@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { Button, Card, CardBody, Heading, Stack, Text } from '@immich/ui';
+	import { Badge, Button, Heading, Stack, Text } from '@immich/ui';
 	import { currentReviewer, reviewableOrgs } from './session.remote';
 
 	const [reviewer, { orgs, installUrl }] = $derived(
@@ -21,15 +21,19 @@
 	<Stack gap={4}>
 		<Heading size="medium">Organisations</Heading>
 		{#each orgs as org (org.id)}
-			<a href={resolve('/orgs/[org]', { org: org.login })}>
-				<Card>
-					<CardBody>
-						<Text>
-							<b>{org.login}</b>
-							· {org.toReview === 0 ? 'nothing to review' : `${org.toReview} to review`}
-						</Text>
-					</CardBody>
-				</Card>
+			<a
+				href={resolve('/orgs/[org]', { org: org.login })}
+				class="flex items-center justify-between rounded-xl border border-light-200 p-4 transition-colors hover:border-primary-500 hover:bg-subtle"
+			>
+				<span class="flex items-center gap-3">
+					<img src="https://github.com/{org.login}.png?size=64" alt="" class="size-8 rounded-lg" />
+					<b>{org.login}</b>
+				</span>
+				{#if org.toReview === 0}
+					<Text size="small" color="muted">nothing to review</Text>
+				{:else}
+					<Badge color="warning">{org.toReview} to review</Badge>
+				{/if}
 			</a>
 		{:else}
 			<Text>slopbonk isn't installed on any organisation you belong to.</Text>
