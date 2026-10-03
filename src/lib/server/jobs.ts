@@ -95,20 +95,6 @@ export const backfillCommentsQueue = defineQueue<BackfillComments>(
 	byInstallation
 );
 
-export interface GithubBlockChange {
-	installationId: number;
-	userId: number;
-	action: 'block' | 'unblock';
-	/** The maintainer who blocked or unblocked the account on GitHub. */
-	actor: { id: number; login: string };
-}
-
-/** A block or unblock made on GitHub itself, outside slopbonk. */
-export const githubBlockChangeQueue = defineQueue<GithubBlockChange>(
-	'review.github-block-change',
-	LOCAL_RETRIES
-);
-
 export interface OutboxItem {
 	installationId: number;
 	outboxId: number;
@@ -130,6 +116,5 @@ export const queues: QueueDefinition<object>[] = [
 	backfillPageQueue,
 	backfillCommentsQueue,
 	outboxQueue,
-	githubBlockChangeQueue,
 	retentionQueue
 ];

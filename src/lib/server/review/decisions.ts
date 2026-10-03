@@ -1,5 +1,5 @@
 import type { Db } from '../db';
-import { outboxQueue, type GithubBlockChange } from '../jobs';
+import { outboxQueue } from '../jobs';
 import type { JobSender } from '../queue';
 
 export type ReviewAction = 'block' | 'dismiss';
@@ -131,46 +131,4 @@ export async function recordDecision(
 		);
 	}
 	return { decisionId: result.decisionId, outboxIds: result.outboxIds };
-}
-
-/**
- * Brings a flagged account's case in line with a block or unblock made on GitHub, recording it as
- * that maintainer's decision. An unblock counts as a dismissal.
- */
-export async function recordGithubBlockChange(db: Db, change: GithubBlockChange): Promise<void> {
-	await db.transaction().execute(async (tx) => {
-		const found = await tx
-			.selectFrom('cases')
-			.select(['id', 'state', 'score'])
-			.where('installation_id', '=', change.installationId)
-			.where('user_id', '=', change.userId)
-			.executeTakeFirst();
-		const blocked = found?.state === 'blocked';
-		if (!found || blocked === (change.action === 'block')) {
-			return;
-		}
-		await tx
-			.insertInto('github_users')
-			.values(change.actor)
-			.onConflict((oc) => oc.column('id').doNothing())
-			.execute();
-		await tx
-			.insertInto('decisions')
-			.values({
-				case_id: found.id,
-				actor_id: change.actor.id,
-				action: change.action,
-				reason: change.action === 'block' ? 'Blocked on GitHub' : 'Unblocked on GitHub'
-			})
-			.execute();
-		await tx
-			.updateTable('cases')
-			.set(
-				change.action === 'block'
-					? { state: 'blocked' }
-					: { state: 'dismissed', dismissed_score: found.score }
-			)
-			.where('id', '=', found.id)
-			.execute();
-	});
 }

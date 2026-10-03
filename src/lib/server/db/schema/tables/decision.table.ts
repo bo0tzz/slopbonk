@@ -11,13 +11,10 @@ import { CaseTable } from './case.table.js';
 import { EvaluationTable } from './evaluation.table.js';
 import { GithubUserTable } from './github-user.table.js';
 
-export type DecisionAction = 'block' | 'dismiss' | 'unblock';
+export type DecisionAction = 'block' | 'dismiss';
 
 @Table({ name: 'decisions' })
-@Check({
-	name: 'decisions_action_check',
-	expression: `action IN ('block', 'dismiss', 'unblock')`
-})
+@Check({ name: 'decisions_action_check', expression: `action IN ('block', 'dismiss')` })
 export class DecisionTable {
 	@PrimaryColumn({ type: 'bigint', identity: true })
 	id!: Generated<number>;

@@ -204,31 +204,6 @@ describe('webhook ingest', () => {
 		]);
 	});
 
-	it('passes on blocks made by maintainers on GitHub, but not its own', async () => {
-		const blocked = (sender: object) =>
-			deliver('org_block', {
-				action: 'blocked',
-				installation: { id: 10 },
-				organization: { id: 100, login: 'some-org' },
-				blocked_user: { id: 300, login: 'commenter', type: 'User' },
-				sender
-			});
-		await blocked({ id: 500, login: 'maintainer', type: 'User' });
-		await blocked({ id: 600, login: 'slopbonk[bot]', type: 'Bot' });
-		expect(sent).toEqual([
-			{
-				queue: 'review.github-block-change',
-				data: {
-					installationId: 10,
-					userId: 300,
-					action: 'block',
-					actor: { id: 500, login: 'maintainer' }
-				},
-				key: undefined
-			}
-		]);
-	});
-
 	it('follows an organisation renaming itself', async () => {
 		await deliver('installation_target', {
 			action: 'renamed',

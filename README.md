@@ -16,7 +16,7 @@ mise run dev
 
 ## Registering the GitHub App
 
-Each instance needs its own GitHub App. [This link](https://github.com/settings/apps/new?name=slopbonk&description=Finds+accounts+that+farm+comments+across+many+repositories+and+puts+them+in+front+of+maintainers+for+review.&public=true&webhook_active=true&events%5B%5D=discussion_comment&events%5B%5D=issue_comment&events%5B%5D=org_block&metadata=read&discussions=write&issues=write&pull_requests=write&organization_user_blocking=write) opens GitHub's registration form with the name, permissions and webhook events filled in; to register under an organisation, change `/settings/apps/new` in it to `/organizations/<org>/settings/apps/new`. Then fill in, with `<base>` being the instance's public URL:
+Each instance needs its own GitHub App. [This link](https://github.com/settings/apps/new?name=slopbonk&description=Finds+accounts+that+farm+comments+across+many+repositories+and+puts+them+in+front+of+maintainers+for+review.&public=true&webhook_active=true&events%5B%5D=discussion_comment&events%5B%5D=issue_comment&metadata=read&discussions=write&issues=write&pull_requests=write&organization_user_blocking=write) opens GitHub's registration form with the name, permissions and webhook events filled in; to register under an organisation, change `/settings/apps/new` in it to `/organizations/<org>/settings/apps/new`. Then fill in, with `<base>` being the instance's public URL:
 
 - **Homepage URL**: `<base>`
 - **Callback URL**: `<base>/auth/callback`
