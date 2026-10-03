@@ -54,7 +54,7 @@ describe('recordDecision', () => {
 		const { decisionId, outboxIds } = await recordDecision(db, queue, {
 			installationId: 10,
 			caseId,
-			actorId: REVIEWER,
+			actor: { id: REVIEWER, login: 'reviewer' },
 			action: 'block'
 		});
 		expect(await caseState(caseId)).toEqual({ state: 'blocked', dismissed_score: null });
@@ -71,7 +71,7 @@ describe('recordDecision', () => {
 		const { decisionId } = await recordDecision(db, queue, {
 			installationId: 10,
 			caseId,
-			actorId: REVIEWER,
+			actor: { id: REVIEWER, login: 'reviewer' },
 			action: 'dismiss'
 		});
 		expect(await caseState(caseId)).toEqual({ state: 'dismissed', dismissed_score: 4 });
@@ -82,7 +82,12 @@ describe('recordDecision', () => {
 	it('refuses to block on a personal-account installation', async () => {
 		const caseId = await seedCase(db, { installationId: 20, accountType: 'User', userId: 103 });
 		await expect(
-			recordDecision(db, queue, { installationId: 20, caseId, actorId: REVIEWER, action: 'block' })
+			recordDecision(db, queue, {
+				installationId: 20,
+				caseId,
+				actor: { id: REVIEWER, login: 'reviewer' },
+				action: 'block'
+			})
 		).rejects.toThrow(DecisionError);
 		expect((await caseState(caseId)).state).toBe('open');
 		expect(sent).toEqual([]);
@@ -91,7 +96,12 @@ describe('recordDecision', () => {
 	it('refuses a case from another installation', async () => {
 		const caseId = await seedCase(db, { installationId: 30, userId: 104 });
 		await expect(
-			recordDecision(db, queue, { installationId: 10, caseId, actorId: REVIEWER, action: 'block' })
+			recordDecision(db, queue, {
+				installationId: 10,
+				caseId,
+				actor: { id: REVIEWER, login: 'reviewer' },
+				action: 'block'
+			})
 		).rejects.toThrow(DecisionError);
 		expect((await caseState(caseId)).state).toBe('open');
 	});

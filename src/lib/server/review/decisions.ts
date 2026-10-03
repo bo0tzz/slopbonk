@@ -8,8 +8,8 @@ export interface DecisionInput {
 	/** The installation the reviewer is acting in; the case must belong to it. */
 	installationId: number;
 	caseId: number;
-	/** The reviewer's GitHub user id. */
-	actorId: number;
+	/** The reviewer; their account row is restored if retention removed it since they signed in. */
+	actor: { id: number; login: string };
 	action: ReviewAction;
 	reason?: string;
 	/** The evaluation the reviewer was looking at; defaults to the account's latest. */
@@ -55,11 +55,16 @@ export async function recordDecision(
 			)?.id ??
 			null;
 
+		await tx
+			.insertInto('github_users')
+			.values(input.actor)
+			.onConflict((oc) => oc.column('id').doNothing())
+			.execute();
 		const { id: decisionId } = await tx
 			.insertInto('decisions')
 			.values({
 				case_id: input.caseId,
-				actor_id: input.actorId,
+				actor_id: input.actor.id,
 				action: input.action,
 				reason: input.reason ?? null,
 				evaluation_id: evaluationId

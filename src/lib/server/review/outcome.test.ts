@@ -33,7 +33,7 @@ describe('block outcomes', () => {
 		const { outboxIds } = await recordDecision(db, queue, {
 			installationId: INSTALLATION.id,
 			caseId,
-			actorId: REVIEWER,
+			actor: { id: REVIEWER, login: 'reviewer' },
 			action: 'block'
 		});
 		return outboxIds[0];

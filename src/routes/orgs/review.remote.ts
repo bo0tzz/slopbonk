@@ -71,7 +71,7 @@ export const decide = form(
 			await recordDecision(db, queue, {
 				installationId: target.id,
 				caseId,
-				actorId: locals.reviewer!.id,
+				actor: { id: locals.reviewer!.id, login: locals.reviewer!.login },
 				action
 			});
 		} catch (cause) {
