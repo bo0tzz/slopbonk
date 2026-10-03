@@ -5,8 +5,9 @@ import { baseUrl } from '$lib/server/env';
 import { getServices } from '$lib/server/services';
 
 export const GET: RequestHandler = ({ cookies, url }) => {
-	// The state cookie has to live on the same host as the registered callback URL.
-	if (url.origin !== baseUrl()) {
+	// The state cookie has to live on the same host as the registered callback URL. Compare hosts
+	// only: behind a TLS-terminating proxy the request itself arrives as plain http.
+	if (url.host !== new URL(baseUrl()).host) {
 		redirect(302, `${baseUrl()}/auth/login`);
 	}
 	const state = randomBytes(16).toString('hex');
