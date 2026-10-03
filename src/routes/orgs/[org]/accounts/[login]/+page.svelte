@@ -88,7 +88,10 @@
 
 	<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
 		<Stack gap={6} class="min-w-0">
-			<Panel title={`In ${account.org}`}>
+			<Panel
+				title={`In ${account.org}`}
+				collapsedNote={`${account.commentsHere.length} comment${account.commentsHere.length === 1 ? '' : 's'}`}
+			>
 				<Stack gap={3}>
 					{#each account.commentsHere as comment (comment.createdAt.getTime())}
 						<div class="rounded-lg bg-subtle p-3">
