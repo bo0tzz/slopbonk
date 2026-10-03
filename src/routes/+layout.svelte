@@ -1,7 +1,16 @@
 <script lang="ts">
 	import './layout.css';
 	import { resolve } from '$app/paths';
-	import { Button, HStack, Heading, Text, ThemeSwitcher, TooltipProvider } from '@immich/ui';
+	import { mdiGithub } from '@mdi/js';
+	import {
+		Button,
+		HStack,
+		Heading,
+		IconButton,
+		Text,
+		ThemeSwitcher,
+		TooltipProvider
+	} from '@immich/ui';
 	import { currentReviewer } from './session.remote';
 
 	let { children } = $props();
@@ -29,6 +38,16 @@
 						<Button type="submit" size="small" variant="ghost">Sign out</Button>
 					</form>
 				{/if}
+				<IconButton
+					icon={mdiGithub}
+					href="https://github.com/bo0tzz/slopbonk"
+					target="_blank"
+					rel="noreferrer"
+					aria-label="Source code on GitHub"
+					size="small"
+					variant="ghost"
+					shape="round"
+				/>
 				<ThemeSwitcher size="small" />
 			</HStack>
 		</HStack>
