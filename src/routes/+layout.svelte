@@ -14,7 +14,7 @@
 </svelte:head>
 
 <TooltipProvider>
-	<header class="border-b border-light-200 px-6 py-3">
+	<header class="border-b border-light-300 px-6 py-3">
 		<HStack class="justify-between">
 			<a href={resolve('/')}>
 				<HStack>

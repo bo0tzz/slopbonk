@@ -27,7 +27,7 @@
 <Stack gap={4}>
 	<Heading size="medium">{data.org}</Heading>
 
-	<nav class="flex gap-4 border-b border-light-200">
+	<nav class="flex gap-4 border-b border-light-300">
 		{#each tabs as t (t.id)}
 			<a
 				href="{resolve('/orgs/[org]', { org: data.org })}?tab={t.id}"
@@ -42,7 +42,7 @@
 
 	{#each data.entries as entry (entry.caseId)}
 		<div
-			class="relative flex flex-wrap items-center gap-4 rounded-xl border border-light-200 p-4 transition-colors hover:border-primary-500 hover:bg-subtle"
+			class="relative flex flex-wrap items-center gap-4 rounded-xl border border-light-300 p-4 transition-colors hover:border-primary-500 hover:bg-subtle"
 		>
 			<div class="flex min-w-48 flex-1 items-center gap-3">
 				<img
@@ -61,7 +61,7 @@
 				</div>
 				<Badge color={entry.score >= 4 ? 'danger' : 'warning'}>{entry.score}/4</Badge>
 			</div>
-			<div class="flex flex-wrap gap-2">
+			<div class="flex flex-wrap divide-x divide-light-300">
 				{#each entry.stats as stat (stat.signal)}
 					<StatTile {...stat} />
 				{/each}

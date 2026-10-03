@@ -47,7 +47,7 @@
 					fill="transparent"
 				/>
 				{#if d.comments > 0}
-					<path d={column(i, d.comments)} class="fill-primary-500 dark:fill-primary-400" />
+					<path d={column(i, d.comments)} class="fill-primary" />
 				{/if}
 			</g>
 		{/each}

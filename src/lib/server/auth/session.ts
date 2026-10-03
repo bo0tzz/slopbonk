@@ -1,4 +1,7 @@
+import { timingSafeEqual } from 'node:crypto';
 import type { Cookies } from '@sveltejs/kit';
+import { dev } from '$app/environment';
+import { env } from '$env/dynamic/private';
 import { REVIEWER_CACHE_MS } from '../constants';
 import type { Db } from '../db';
 import type { GithubAuth, UserIdentity, UserTokens } from '../github/client';
@@ -55,12 +58,51 @@ async function identify(auth: GithubAuth, accessToken: string, now: number) {
 	return identity;
 }
 
+export const DEV_REVIEWER_COOKIE = 'slopbonk_dev_reviewer';
+
+/**
+ * Development only: a cookie matching DEV_REVIEWER_SECRET signs in as DEV_REVIEWER_ID with access to
+ * every active installation, so pages can be rendered and screenshotted without GitHub sign-in.
+ * Never active outside `vite dev`.
+ */
+async function devReviewer(cookies: Cookies, db: Db): Promise<Reviewer | null> {
+	const secret = env.DEV_REVIEWER_SECRET;
+	const given = cookies.get(DEV_REVIEWER_COOKIE);
+	if (!dev || !secret || !given || !env.DEV_REVIEWER_ID) {
+		return null;
+	}
+	const a = Buffer.from(secret);
+	const b = Buffer.from(given);
+	if (a.length !== b.length || !timingSafeEqual(a, b)) {
+		return null;
+	}
+	const user = await db
+		.selectFrom('github_users')
+		.select(['id', 'login'])
+		.where('id', '=', Number(env.DEV_REVIEWER_ID))
+		.executeTakeFirst();
+	if (!user) {
+		return null;
+	}
+	const installations = await db
+		.selectFrom('installations')
+		.select('id')
+		.where('uninstalled_at', 'is', null)
+		.execute();
+	return { id: user.id, login: user.login, installationIds: installations.map((i) => i.id) };
+}
+
 /** The signed-in reviewer, refreshing their token if needed; null when there's no valid session. */
 export async function authenticate(
 	cookies: Cookies,
 	auth: GithubAuth,
+	db: Db,
 	now = Date.now()
 ): Promise<Reviewer | null> {
+	const developer = await devReviewer(cookies, db);
+	if (developer) {
+		return developer;
+	}
 	let tokens = readTokens(cookies);
 	if (!tokens) {
 		return null;

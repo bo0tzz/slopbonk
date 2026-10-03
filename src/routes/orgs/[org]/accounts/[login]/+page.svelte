@@ -13,7 +13,12 @@
 		await flaggedAccount({ org: page.params.org!, login: page.params.login! })
 	);
 
+	const BURST_PREVIEW = 8;
 	let copied = $state(false);
+	let showWholeBurst = $state(false);
+	const shownBurst = $derived(
+		showWholeBurst ? account.burst : account.burst.slice(0, BURST_PREVIEW)
+	);
 	const when = (date: Date) =>
 		date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 	const burstRepos = $derived(new Set(account.burst.map((c) => c.repository)).size);
@@ -63,22 +68,26 @@
 	</header>
 
 	<Panel title="Why it's flagged">
-		<div class="flex flex-wrap items-stretch gap-3">
-			<div class="flex flex-col justify-center rounded-lg bg-subtle px-4 py-2">
-				<div class="text-2xl font-bold tabular-nums">{account.score}/{account.rules.length}</div>
+		<div class="flex flex-wrap items-center gap-6">
+			<div>
+				<div class="text-3xl leading-tight font-bold tabular-nums">
+					{account.score}/{account.rules.length}
+				</div>
 				<div class="text-xs text-light-600">score</div>
 			</div>
-			{#each account.stats as stat (stat.signal)}
-				<StatTile {...stat} />
-			{/each}
+			<div class="flex flex-wrap divide-x divide-light-300">
+				{#each account.stats as stat (stat.signal)}
+					<StatTile {...stat} />
+				{/each}
+			</div>
 		</div>
 		{#if account.dataAsOf}
 			<Text size="small" color="muted" class="mt-3">History as of {when(account.dataAsOf)}</Text>
 		{/if}
 	</Panel>
 
-	<div class="grid gap-6 lg:grid-cols-[1fr_18rem]">
-		<Stack gap={6}>
+	<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+		<Stack gap={6} class="min-w-0">
 			<Panel title={`In ${account.org}`}>
 				<Stack gap={3}>
 					{#each account.commentsHere as comment (comment.createdAt.getTime())}
@@ -100,8 +109,8 @@
 					<Text class="mt-5" fontWeight="semi-bold">
 						Burst: {account.burst.length} comments across {burstRepos} repositories
 					</Text>
-					<ul class="mt-2 divide-y divide-light-200">
-						{#each account.burst as comment (comment.createdAt.getTime() + comment.url)}
+					<ul class="mt-2 divide-y divide-light-300">
+						{#each shownBurst as comment (comment.createdAt.getTime() + comment.url)}
 							<li class="py-2 text-sm">
 								<div class="flex flex-wrap items-center gap-2">
 									<span class="text-light-600 tabular-nums">{when(comment.createdAt)}</span>
@@ -112,6 +121,11 @@
 							</li>
 						{/each}
 					</ul>
+					{#if account.burst.length > BURST_PREVIEW && !showWholeBurst}
+						<Button variant="ghost" size="small" onclick={() => (showWholeBurst = true)}>
+							Show all {account.burst.length}
+						</Button>
+					{/if}
 				{/if}
 			</Panel>
 		</Stack>

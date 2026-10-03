@@ -8,6 +8,7 @@ export const init: ServerInit = async () => {
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
-	event.locals.reviewer = await authenticate(event.cookies, getServices().auth);
+	const { auth, db } = getServices();
+	event.locals.reviewer = await authenticate(event.cookies, auth, db);
 	return resolve(event);
 };

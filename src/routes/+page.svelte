@@ -23,7 +23,7 @@
 		{#each orgs as org (org.id)}
 			<a
 				href={resolve('/orgs/[org]', { org: org.login })}
-				class="flex items-center justify-between rounded-xl border border-light-200 p-4 transition-colors hover:border-primary-500 hover:bg-subtle"
+				class="flex items-center justify-between rounded-xl border border-light-300 p-4 transition-colors hover:border-primary-500 hover:bg-subtle"
 			>
 				<span class="flex items-center gap-3">
 					<img src="https://github.com/{org.login}.png?size=64" alt="" class="size-8 rounded-lg" />
