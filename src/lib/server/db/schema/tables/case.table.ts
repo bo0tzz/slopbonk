@@ -5,10 +5,12 @@ import {
 	Index,
 	PrimaryColumn,
 	Table,
+	TriggerFunction,
 	Unique,
 	type Generated,
 	type Timestamp
 } from '@immich/sql-tools';
+import { notify_review_change } from '../functions.js';
 import { GithubUserTable } from './github-user.table.js';
 import { InstallationTable } from './installation.table.js';
 
@@ -18,6 +20,13 @@ export type CaseState = 'open' | 'blocked' | 'dismissed';
 @Check({ name: 'cases_state_check', expression: `state IN ('open', 'blocked', 'dismissed')` })
 @Unique({ name: 'cases_installation_user_uq', columns: ['installation_id', 'user_id'] })
 @Index({ name: 'cases_queue_idx', columns: ['installation_id', 'state', 'score'] })
+@TriggerFunction({
+	name: 'cases_notify_review_change',
+	timing: 'after',
+	actions: ['insert', 'update', 'delete'],
+	scope: 'row',
+	function: notify_review_change
+})
 export class CaseTable {
 	@PrimaryColumn({ type: 'bigint', identity: true })
 	id!: Generated<number>;

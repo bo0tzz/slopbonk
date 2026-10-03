@@ -5,9 +5,11 @@ import {
 	Index,
 	PrimaryColumn,
 	Table,
+	TriggerFunction,
 	type Generated,
 	type Timestamp
 } from '@immich/sql-tools';
+import { notify_review_change } from '../functions.js';
 import { DecisionTable } from './decision.table.js';
 import { InstallationTable } from './installation.table.js';
 
@@ -21,6 +23,13 @@ export type OutboxStatus = 'pending' | 'done' | 'failed';
 })
 @Check({ name: 'outbox_status_check', expression: `status IN ('pending', 'done', 'failed')` })
 @Index({ name: 'outbox_pending_idx', columns: ['created_at'], where: `status = 'pending'` })
+@TriggerFunction({
+	name: 'outbox_notify_review_change',
+	timing: 'after',
+	actions: ['insert', 'update', 'delete'],
+	scope: 'row',
+	function: notify_review_change
+})
 export class OutboxTable {
 	@PrimaryColumn({ type: 'bigint', identity: true })
 	id!: Generated<number>;

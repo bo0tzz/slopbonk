@@ -1,5 +1,5 @@
 import { Database } from '@immich/sql-tools';
-import { insert_only } from './functions.js';
+import { insert_only, notify_review_change } from './functions.js';
 import { CaseTable } from './tables/case.table.js';
 import { CommentEditTable } from './tables/comment-edit.table.js';
 import { CommentTable } from './tables/comment.table.js';
@@ -33,7 +33,7 @@ export class SlopbonkDatabase {
 		DecisionTable,
 		OutboxTable
 	];
-	functions = [insert_only];
+	functions = [insert_only, notify_review_change];
 }
 
 export interface DB {

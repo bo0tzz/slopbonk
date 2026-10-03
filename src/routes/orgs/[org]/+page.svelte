@@ -4,7 +4,7 @@
 	import { Badge, Heading, Stack, Text } from '@immich/ui';
 	import DecisionButtons from '../DecisionButtons.svelte';
 	import StatTile from '$lib/components/StatTile.svelte';
-	import { keepFresh } from '$lib/refresh.svelte';
+	import { onReviewChange } from '$lib/review-changes.svelte';
 	import { orgQueue } from '../review.remote';
 
 	type Tab = 'review' | 'blocked' | 'dismissed';
@@ -16,7 +16,10 @@
 
 	const tab = $derived((page.url.searchParams.get('tab') ?? 'review') as Tab);
 	const data = $derived(await orgQueue({ org: page.params.org!, tab }));
-	keepFresh(() => orgQueue({ org: page.params.org!, tab }).refresh());
+	onReviewChange(
+		(event) => 'installationId' in event && event.installationId === data.installationId,
+		() => orgQueue({ org: page.params.org!, tab }).refresh()
+	);
 
 	const ago = (date: Date) => {
 		const minutes = Math.round((Date.now() - date.getTime()) / 60_000);

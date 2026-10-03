@@ -28,6 +28,7 @@ export const orgQueue = query(
 		]);
 		return {
 			org: target.login,
+			installationId: target.id,
 			canBlock: target.accountType === 'Organization',
 			maxScore: MAX_SCORE,
 			counts,
@@ -44,7 +45,12 @@ export const flaggedAccount = query(
 		if (!evidence) {
 			error(404, 'Not found');
 		}
-		return { org: target.login, canBlock: target.accountType === 'Organization', ...evidence };
+		return {
+			org: target.login,
+			installationId: target.id,
+			canBlock: target.accountType === 'Organization',
+			...evidence
+		};
 	}
 );
 

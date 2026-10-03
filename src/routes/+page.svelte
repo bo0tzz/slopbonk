@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { Badge, Button, Heading, Stack, Text } from '@immich/ui';
-	import { keepFresh } from '$lib/refresh.svelte';
+	import { onReviewChange } from '$lib/review-changes.svelte';
 	import { currentReviewer, reviewableOrgs } from './session.remote';
 
 	const [reviewer, { orgs, installUrl }] = $derived(
 		await Promise.all([currentReviewer(), reviewableOrgs()])
 	);
-	keepFresh(() => reviewableOrgs().refresh());
+	onReviewChange(
+		() => true,
+		() => reviewableOrgs().refresh()
+	);
 </script>
 
 {#if !reviewer}

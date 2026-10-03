@@ -3,9 +3,11 @@ import {
 	Column,
 	PrimaryColumn,
 	Table,
+	TriggerFunction,
 	type Generated,
 	type Timestamp
 } from '@immich/sql-tools';
+import { notify_review_change } from '../functions.js';
 import type { JSONColumnType } from 'kysely';
 
 export type AccountType = 'Organization' | 'User';
@@ -14,6 +16,13 @@ export type AccountType = 'Organization' | 'User';
 @Check({
 	name: 'installations_account_type_check',
 	expression: `account_type IN ('Organization', 'User')`
+})
+@TriggerFunction({
+	name: 'installations_notify_review_change',
+	timing: 'after',
+	actions: ['insert', 'update', 'delete'],
+	scope: 'row',
+	function: notify_review_change
 })
 export class InstallationTable {
 	@PrimaryColumn({ type: 'bigint' })

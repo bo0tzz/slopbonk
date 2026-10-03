@@ -1,5 +1,6 @@
 // Composition root: builds every long-lived dependency once at startup and wires the workers.
 import { createDb, type Db } from './db';
+import { listenForReviewChanges, type ReviewChanges } from './db/changes';
 import { migrateToLatest } from './db/migrate';
 import { databaseUrl, githubApp } from './env';
 import { outboxWorker } from './act/workers';
@@ -23,6 +24,7 @@ import { startQueue, type JobQueue } from './queue';
 export interface Services {
 	db: Db;
 	queue: JobQueue;
+	reviewChanges: ReviewChanges;
 	auth: GithubAuth;
 	webhookSecret: string;
 }
@@ -56,7 +58,15 @@ export async function startServices(): Promise<Services> {
 	await queue.schedule(retentionQueue, '17 3 * * *', {});
 	await requeuePending(db, queue);
 
-	services = { db, queue, auth: appAuth(app), webhookSecret: github.webhookSecret };
+	const reviewChanges = await listenForReviewChanges(databaseUrl());
+
+	services = {
+		db,
+		queue,
+		reviewChanges,
+		auth: appAuth(app),
+		webhookSecret: github.webhookSecret
+	};
 	return services;
 }
 
@@ -71,6 +81,7 @@ export async function stopServices(): Promise<void> {
 	const stopping = services;
 	services = undefined;
 	if (stopping) {
+		await stopping.reviewChanges.stop();
 		await stopping.queue.stop();
 		await stopping.db.destroy();
 	}

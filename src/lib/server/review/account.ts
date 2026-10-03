@@ -32,6 +32,7 @@ export interface ActionOutcome {
 }
 
 export interface AccountEvidence {
+	userId: number;
 	login: string;
 	accountCreatedAt: Date | null;
 	followers: number | null;
@@ -167,6 +168,7 @@ export async function accountEvidence(
 		: [];
 
 	return {
+		userId: found.user_id,
 		login: found.login,
 		accountCreatedAt: found.account_created_at ? new Date(found.account_created_at) : null,
 		followers: found.followers,

@@ -7,10 +7,19 @@
 	import Panel from '$lib/components/Panel.svelte';
 	import StatTile from '$lib/components/StatTile.svelte';
 	import DecisionButtons from '../../../DecisionButtons.svelte';
+	import { onReviewChange } from '$lib/review-changes.svelte';
 	import { flaggedAccount } from '../../../review.remote';
 
 	const account = $derived(
 		await flaggedAccount({ org: page.params.org!, login: page.params.login! })
+	);
+
+	onReviewChange(
+		(event) =>
+			'installationId' in event &&
+			event.installationId === account.installationId &&
+			event.userId === account.userId,
+		() => flaggedAccount({ org: page.params.org!, login: page.params.login! }).refresh()
 	);
 
 	const BURST_PREVIEW = 8;
