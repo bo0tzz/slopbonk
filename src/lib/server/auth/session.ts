@@ -39,6 +39,23 @@ function readTokens(cookies: Cookies): UserTokens | null {
 	}
 }
 
+/**
+ * GitHub refresh tokens work once. Requests that arrive together, or shortly after, with the same
+ * expired session share one refresh instead of the later ones failing and signing the reviewer out.
+ */
+const REFRESH_REUSE_MS = 60 * 1000;
+const refreshes = new Map<string, Promise<UserTokens>>();
+
+function refreshOnce(auth: GithubAuth, refreshToken: string): Promise<UserTokens> {
+	let refreshing = refreshes.get(refreshToken);
+	if (!refreshing) {
+		refreshing = auth.refresh(refreshToken);
+		refreshes.set(refreshToken, refreshing);
+		setTimeout(() => refreshes.delete(refreshToken), REFRESH_REUSE_MS).unref();
+	}
+	return refreshing;
+}
+
 const cache = new Map<string, { identity: UserIdentity; until: number }>();
 
 async function identify(auth: GithubAuth, accessToken: string, now: number) {
@@ -114,7 +131,7 @@ export async function authenticate(
 			return null;
 		}
 		try {
-			tokens = await auth.refresh(tokens.refreshToken);
+			tokens = await refreshOnce(auth, tokens.refreshToken);
 		} catch {
 			cookies.delete(SESSION_COOKIE, { path: '/' });
 			return null;
