@@ -3,7 +3,6 @@ import type { Db } from '../db';
 import type { CaseState } from '../db/schema/tables/case.table';
 import type { OutboxStatus } from '../db/schema/tables/outbox.table';
 import type { ThreadKind } from '../db/schema/tables/thread.table';
-import { RULESET, score } from '../scoring/rules';
 import {
 	BURST_MIN_REPOS,
 	DAY,
@@ -13,16 +12,9 @@ import {
 	type SignalName
 } from '../scoring/signals';
 import { reportUrl, threadUrl } from './links';
+import { MAX_SCORE, stats, type Stat } from './stats';
 
 const ACTIVITY_DAYS = 30;
-
-export interface ExplainedRule {
-	name: string;
-	signal: SignalName;
-	value: number;
-	atLeast: number;
-	fired: boolean;
-}
 
 export interface EvidenceComment {
 	body: string;
@@ -41,9 +33,10 @@ export interface AccountEvidence {
 	caseId: number;
 	state: CaseState;
 	score: number;
+	maxScore: number;
 	evaluatedAt: Date | null;
 	dataAsOf: Date | null;
-	rules: ExplainedRule[];
+	stats: Stat[];
 	commentsHere: EvidenceComment[];
 	/** Outward comments per day for the last 30 days, oldest first. */
 	activity: { day: string; comments: number }[];
@@ -100,16 +93,8 @@ export async function accountEvidence(
 				.where('evaluation_id', '=', evaluation.id)
 				.execute()
 		: [];
-	const values = new Map(signals.map((s) => [s.signal_name, s.value]));
-	const fired = new Set(
-		score(
-			RULESET,
-			signals.map((s) => ({
-				name: s.signal_name as SignalName,
-				version: s.signal_version,
-				value: s.value
-			}))
-		).fired.map((rule) => rule.name)
+	const shown = stats(
+		Object.fromEntries(signals.map((s) => [s.signal_name as SignalName, s.value]))
 	);
 
 	const rows: Row[] = (
@@ -171,14 +156,6 @@ export async function accountEvidence(
 		.orderBy('decisions.decided_at', 'desc')
 		.execute();
 
-	const rules = RULESET.rules.map((rule) => ({
-		name: rule.name,
-		signal: rule.signal,
-		value: values.get(rule.signal) ?? 0,
-		atLeast: rule.atLeast,
-		fired: fired.has(rule.name)
-	}));
-
 	return {
 		login: found.login,
 		accountCreatedAt: found.account_created_at ? new Date(found.account_created_at) : null,
@@ -186,9 +163,10 @@ export async function accountEvidence(
 		caseId: found.case_id,
 		state: found.state,
 		score: found.score,
+		maxScore: MAX_SCORE,
 		evaluatedAt: evaluation ? new Date(evaluation.evaluated_at) : null,
 		dataAsOf: evaluation ? new Date(evaluation.data_as_of) : null,
-		rules,
+		stats: shown,
 		commentsHere,
 		activity: dailyActivity(outward, now),
 		burst,
@@ -199,7 +177,7 @@ export async function accountEvidence(
 			outcome: d.status ? { status: d.status, error: d.last_error } : null
 		})),
 		reportUrl: reportUrl(found.login),
-		reportSummary: summary(found.login, installation.login, rules, burst)
+		reportSummary: summary(found.login, installation.login, shown, burst)
 	};
 }
 
@@ -231,18 +209,11 @@ function dailyActivity(comments: ActivityComment[], now: Date) {
 }
 
 /** Plain-text evidence to paste into GitHub's report form. */
-function summary(
-	login: string,
-	org: string,
-	rules: ExplainedRule[],
-	burst: EvidenceComment[]
-): string {
+function summary(login: string, org: string, shown: Stat[], burst: EvidenceComment[]): string {
 	const lines = [
 		`The account ${login} appears to post automated (LLM-generated) comments across many unrelated repositories, including ${org}.`,
 		'',
-		...rules
-			.filter((rule) => rule.fired)
-			.map((rule) => `- ${describeRule(rule.signal, rule.value)}`),
+		...shown.filter((stat) => stat.fired).map((stat) => `- ${stat.description}`),
 		''
 	];
 	if (burst.length > 0) {
@@ -252,50 +223,4 @@ function summary(
 		}
 	}
 	return lines.join('\n');
-}
-
-export interface Stat {
-	signal: SignalName;
-	value: string;
-	label: string;
-	fired: boolean;
-}
-
-/** The ruleset's signals as short tiles, in rule order, marking those that counted towards the score. */
-export function stats(values: Partial<Record<SignalName, number>>): Stat[] {
-	const signals = values as Record<SignalName, number>;
-	const fired = new Set(
-		score(
-			RULESET,
-			Object.entries(signals).map(([name, value]) => ({
-				name: name as SignalName,
-				version: 1,
-				value
-			}))
-		).fired.map((rule) => rule.signal)
-	);
-	return RULESET.rules.map(({ signal }) => {
-		const value = signals[signal] ?? 0;
-		const percent = `${Math.round(value * 100)}%`;
-		const [shown, label] = {
-			peak_repos_24h: [String(value), 'repos within 24h'],
-			peak_repos_1m: [String(value), 'repos within a minute'],
-			qa_share: [percent, 'answers overall'],
-			qa_share_burst: [percent, 'answers in a burst']
-		}[signal];
-		return { signal, value: shown, label, fired: fired.has(signal) };
-	});
-}
-
-export function describeRule(signal: SignalName, value: number): string {
-	switch (signal) {
-		case 'peak_repos_24h':
-			return `${value} different repositories within 24 hours`;
-		case 'peak_repos_1m':
-			return `${value} different repositories within one minute`;
-		case 'qa_share':
-			return `${Math.round(value * 100)}% of comments are answers in Q&A discussions`;
-		case 'qa_share_burst':
-			return `${Math.round(value * 100)}% answers in its busiest multi-repository burst`;
-	}
 }

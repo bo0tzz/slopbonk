@@ -59,8 +59,14 @@
 					</a>
 					<Text size="small" color="muted">last seen {ago(entry.lastSeen)}</Text>
 				</div>
-				<Badge color={tab !== 'review' ? 'secondary' : entry.score >= 4 ? 'danger' : 'warning'}>
-					{entry.score}/4
+				<Badge
+					color={tab !== 'review'
+						? 'secondary'
+						: entry.score >= data.maxScore
+							? 'danger'
+							: 'warning'}
+				>
+					{entry.score}/{data.maxScore}
 				</Badge>
 				{#if entry.blockStatus === 'failed'}
 					<Badge color="danger">block failed</Badge>

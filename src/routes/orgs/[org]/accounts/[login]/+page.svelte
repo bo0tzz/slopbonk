@@ -71,7 +71,7 @@
 		<div class="flex flex-wrap items-center gap-6">
 			<div>
 				<div class="text-3xl leading-tight font-bold tabular-nums">
-					{account.score}/{account.rules.length}
+					{account.score}/{account.maxScore}
 				</div>
 				<div class="text-xs text-light-600">score</div>
 			</div>

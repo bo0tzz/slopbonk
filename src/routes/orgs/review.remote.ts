@@ -2,7 +2,8 @@ import { error, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { form, getRequestEvent, query } from '$app/server';
 import { installationForReviewer } from '$lib/server/auth/access';
-import { accountEvidence, describeRule, stats } from '$lib/server/review/account';
+import { accountEvidence } from '$lib/server/review/account';
+import { MAX_SCORE } from '$lib/server/review/stats';
 import { DecisionError, recordDecision } from '$lib/server/review/decisions';
 import { listQueue, nextToReview, queueCounts } from '$lib/server/review/queue';
 import { getServices } from '$lib/server/services';
@@ -28,8 +29,9 @@ export const orgQueue = query(
 		return {
 			org: target.login,
 			canBlock: target.accountType === 'Organization',
+			maxScore: MAX_SCORE,
 			counts,
-			entries: entries.map(({ signals, ...entry }) => ({ ...entry, stats: stats(signals) }))
+			entries
 		};
 	}
 );
@@ -42,16 +44,7 @@ export const flaggedAccount = query(
 		if (!evidence) {
 			error(404, 'Not found');
 		}
-		return {
-			org: target.login,
-			canBlock: target.accountType === 'Organization',
-			...evidence,
-			stats: stats(Object.fromEntries(evidence.rules.map((rule) => [rule.signal, rule.value]))),
-			rules: evidence.rules.map((rule) => ({
-				...rule,
-				description: describeRule(rule.signal, rule.value)
-			}))
-		};
+		return { org: target.login, canBlock: target.accountType === 'Organization', ...evidence };
 	}
 );
 
@@ -80,7 +73,7 @@ export const decide = form(
 			}
 			throw cause;
 		}
-		const next = then === 'next' ? await nextToReview(db, target, caseId) : null;
+		const next = then === 'next' ? await nextToReview(db, target.id, caseId) : null;
 		redirect(303, next ? `/orgs/${target.login}/accounts/${next}` : `/orgs/${target.login}`);
 	}
 );

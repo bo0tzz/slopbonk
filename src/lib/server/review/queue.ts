@@ -4,6 +4,7 @@ import type { CaseState } from '../db/schema/tables/case.table';
 import type { OutboxStatus } from '../db/schema/tables/outbox.table';
 import type { SignalName } from '../scoring/signals';
 import { threadUrl } from './links';
+import { stats, type Stat } from './stats';
 
 export type QueueTab = 'review' | 'blocked' | 'dismissed';
 
@@ -13,7 +14,7 @@ export interface QueueEntry {
 	score: number;
 	state: CaseState;
 	lastSeen: Date;
-	signals: Partial<Record<SignalName, number>>;
+	stats: Stat[];
 	latestComment: { body: string; url: string; createdAt: Date } | null;
 	/** For blocked accounts, whether the latest block has been carried out on GitHub. */
 	blockStatus: OutboxStatus | null;
@@ -28,14 +29,13 @@ export interface QueueCounts {
 export async function queueCounts(db: Db, installationId: number): Promise<QueueCounts> {
 	const rows = await db
 		.selectFrom('cases')
-		.select(['state', 'score'])
+		.select(['state', (eb) => eb.fn.countAll<string>().as('count')])
 		.where('installation_id', '=', installationId)
+		.where((eb) => eb.or([eb('state', '<>', 'open'), eb('score', '>=', QUEUE_THRESHOLD)]))
+		.groupBy('state')
 		.execute();
-	return {
-		review: rows.filter((r) => r.state === 'open' && r.score >= QUEUE_THRESHOLD).length,
-		blocked: rows.filter((r) => r.state === 'blocked').length,
-		dismissed: rows.filter((r) => r.state === 'dismissed').length
-	};
+	const count = (state: CaseState) => Number(rows.find((row) => row.state === state)?.count ?? 0);
+	return { review: count('open'), blocked: count('blocked'), dismissed: count('dismissed') };
 }
 
 export async function listQueue(
@@ -132,8 +132,12 @@ export async function listQueue(
 			score: c.score,
 			state: c.state,
 			lastSeen: new Date(c.last_seen_at),
-			signals: Object.fromEntries(
-				signalRows.filter((s) => s.user_id === c.user_id).map((s) => [s.signal_name, s.value])
+			stats: stats(
+				Object.fromEntries(
+					signalRows
+						.filter((s) => s.user_id === c.user_id)
+						.map((s) => [s.signal_name as SignalName, s.value])
+				)
 			),
 			latestComment: comment
 				? {
@@ -150,9 +154,20 @@ export async function listQueue(
 /** The account to show after deciding on `afterCaseId`: the next one in the review queue. */
 export async function nextToReview(
 	db: Db,
-	installation: { id: number; accountId: number },
+	installationId: number,
 	afterCaseId: number
 ): Promise<string | null> {
-	const queue = await listQueue(db, installation, 'review');
-	return queue.find((entry) => entry.caseId !== afterCaseId)?.login ?? null;
+	const next = await db
+		.selectFrom('cases')
+		.innerJoin('github_users', 'github_users.id', 'cases.user_id')
+		.select('github_users.login')
+		.where('cases.installation_id', '=', installationId)
+		.where('cases.state', '=', 'open')
+		.where('cases.score', '>=', QUEUE_THRESHOLD)
+		.where('cases.id', '<>', afterCaseId)
+		.orderBy('cases.score', 'desc')
+		.orderBy('cases.last_seen_at', 'desc')
+		.limit(1)
+		.executeTakeFirst();
+	return next?.login ?? null;
 }
