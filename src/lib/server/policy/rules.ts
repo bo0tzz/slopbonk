@@ -1,9 +1,9 @@
-import type { SignalValue } from './signals';
+import type { SignalName, SignalValue } from './signals';
 
 /** One signal compared against one threshold; contributes its weight when it holds (ADR-0003). */
 export interface Rule {
 	name: string;
-	signal: string;
+	signal: SignalName;
 	atLeast: number;
 	weight: number;
 }

@@ -1,12 +1,12 @@
 import type { Db } from '../db';
 import type { GithubClient } from '../github/client';
-import { worker, type JobQueue } from '../queue';
+import { worker, type JobSender } from '../queue';
 import { fetchHistory } from './history';
 import { evaluateQueue, fetchHistoryQueue, jobKey } from '../jobs';
 
 interface Deps {
 	db: Db;
-	queue: Pick<JobQueue, 'send'>;
+	queue: JobSender;
 	clientFor: (installationId: number) => Promise<GithubClient>;
 }
 

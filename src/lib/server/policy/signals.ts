@@ -94,8 +94,11 @@ export function qaShare(comments: ActivityComment[]): number {
 const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
 
+/** Every signal policy computes; rules can only refer to these. */
+export type SignalName = 'peak_repos_1m' | 'peak_repos_24h' | 'qa_share' | 'qa_share_burst';
+
 export interface SignalValue {
-	name: string;
+	name: SignalName;
 	version: number;
 	value: number;
 }

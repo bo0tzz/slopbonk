@@ -1,11 +1,11 @@
 import type { Db } from '../db';
 import { evaluateQueue } from '../jobs';
-import { worker, type JobQueue } from '../queue';
+import { worker, type JobSender } from '../queue';
 import { evaluate } from './evaluate';
 
 interface Deps {
 	db: Db;
-	queue: Pick<JobQueue, 'send'>;
+	queue: JobSender;
 }
 
 export function evaluateWorker({ db, queue }: Deps) {

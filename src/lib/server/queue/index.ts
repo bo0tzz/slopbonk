@@ -45,6 +45,9 @@ export class JobQueue {
 	}
 }
 
+/** What components need to hand work to each other. */
+export type JobSender = Pick<JobQueue, 'send'>;
+
 export async function startQueue(
 	connectionString: string,
 	queues: QueueDefinition<object>[],

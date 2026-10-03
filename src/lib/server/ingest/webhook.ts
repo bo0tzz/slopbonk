@@ -1,14 +1,12 @@
 import { Webhooks, type EmitterWebhookEvent } from '@octokit/webhooks';
 import type { Db } from '../db';
-import type { JobQueue } from '../queue';
+import type { JobSender } from '../queue';
 import { evaluateQueue, jobKey } from '../jobs';
 import { storeComment, storeRepository, storeThread } from './store';
 
-type Queue = Pick<JobQueue, 'send'>;
-
 interface Deps {
 	db: Db;
-	queue: Queue;
+	queue: JobSender;
 	secret: string;
 }
 
