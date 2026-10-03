@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { resolve } from '$app/paths';
-	import { Button, HStack, Heading, Text, ThemeSwitcher } from '@immich/ui';
+	import { Button, HStack, Heading, Text, ThemeSwitcher, TooltipProvider } from '@immich/ui';
 	import { currentReviewer } from './session.remote';
 
 	let { children } = $props();
@@ -13,26 +13,28 @@
 	<title>slopbonk</title>
 </svelte:head>
 
-<header class="border-b border-light-200 px-6 py-3">
-	<HStack class="justify-between">
-		<a href={resolve('/')}>
+<TooltipProvider>
+	<header class="border-b border-light-200 px-6 py-3">
+		<HStack class="justify-between">
+			<a href={resolve('/')}>
+				<HStack>
+					<img src="/logo.png" alt="" class="size-8" />
+					<Heading size="small">slopbonk</Heading>
+				</HStack>
+			</a>
 			<HStack>
-				<img src="/logo.png" alt="" class="size-8" />
-				<Heading size="small">slopbonk</Heading>
+				{#if reviewer}
+					<Text size="small">{reviewer.login}</Text>
+					<form method="POST" action={resolve('/auth/logout')}>
+						<Button type="submit" size="small" variant="ghost">Sign out</Button>
+					</form>
+				{/if}
+				<ThemeSwitcher size="small" />
 			</HStack>
-		</a>
-		<HStack>
-			{#if reviewer}
-				<Text size="small">{reviewer.login}</Text>
-				<form method="POST" action={resolve('/auth/logout')}>
-					<Button type="submit" size="small" variant="ghost">Sign out</Button>
-				</form>
-			{/if}
-			<ThemeSwitcher size="small" />
 		</HStack>
-	</HStack>
-</header>
+	</header>
 
-<main class="mx-auto max-w-5xl p-6">
-	{@render children()}
-</main>
+	<main class="mx-auto max-w-5xl p-6">
+		{@render children()}
+	</main>
+</TooltipProvider>
