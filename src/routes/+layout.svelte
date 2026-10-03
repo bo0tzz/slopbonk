@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { resolve } from '$app/paths';
+	import { env } from '$env/dynamic/public';
 	import { mdiGithub } from '@mdi/js';
 	import {
 		Button,
@@ -56,4 +57,14 @@
 	<main class="mx-auto max-w-5xl p-6">
 		{@render children()}
 	</main>
+
+	{#if env.PUBLIC_CONTACT_EMAIL}
+		<footer class="mx-auto max-w-5xl px-6 pb-6">
+			<Text size="small" color="muted">
+				To ask about or remove data about your GitHub account, email
+				<a href="mailto:{env.PUBLIC_CONTACT_EMAIL}" class="underline">{env.PUBLIC_CONTACT_EMAIL}</a
+				>.
+			</Text>
+		</footer>
+	{/if}
 </TooltipProvider>
