@@ -11,3 +11,24 @@ function required(name: string): string {
 export function databaseUrl(): string {
 	return required('DATABASE_URL');
 }
+
+export interface GithubAppConfig {
+	appId: number;
+	slug: string;
+	clientId: string;
+	clientSecret: string;
+	webhookSecret: string;
+	privateKey: string;
+}
+
+export function githubApp(): GithubAppConfig {
+	return {
+		appId: Number(required('GITHUB_APP_ID')),
+		slug: required('GITHUB_APP_SLUG'),
+		clientId: required('GITHUB_CLIENT_ID'),
+		clientSecret: required('GITHUB_CLIENT_SECRET'),
+		webhookSecret: required('GITHUB_WEBHOOK_SECRET'),
+		// .env files hold the PEM on one line with escaped newlines.
+		privateKey: required('GITHUB_PRIVATE_KEY').replaceAll('\\n', '\n')
+	};
+}
