@@ -4,7 +4,11 @@ import type { RequestHandler } from './$types';
 import { baseUrl } from '$lib/server/env';
 import { getServices } from '$lib/server/services';
 
-export const GET: RequestHandler = ({ cookies }) => {
+export const GET: RequestHandler = ({ cookies, url }) => {
+	// The state cookie has to live on the same host as the registered callback URL.
+	if (url.origin !== baseUrl()) {
+		redirect(302, `${baseUrl()}/auth/login`);
+	}
 	const state = randomBytes(16).toString('hex');
 	cookies.set('slopbonk_oauth_state', state, {
 		path: '/auth/callback',

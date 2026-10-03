@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
 	import { resolve } from '$app/paths';
 	import { Button, HStack, Heading, Text } from '@immich/ui';
 	import { currentReviewer } from './session.remote';
@@ -10,13 +9,18 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href="/logo.png" />
 	<title>slopbonk</title>
 </svelte:head>
 
 <header class="border-b border-gray-200 px-6 py-3 dark:border-gray-800">
 	<HStack class="justify-between">
-		<a href={resolve('/')}><Heading size="small">slopbonk</Heading></a>
+		<a href={resolve('/')}>
+			<HStack>
+				<img src="/logo.png" alt="" class="size-8" />
+				<Heading size="small">slopbonk</Heading>
+			</HStack>
+		</a>
 		{#if reviewer}
 			<HStack>
 				<Text size="small">{reviewer.login}</Text>

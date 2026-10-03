@@ -3,8 +3,9 @@
 	import { Button, Card, CardBody, Heading, Stack, Text } from '@immich/ui';
 	import { currentReviewer, reviewableOrgs } from './session.remote';
 
-	const reviewer = $derived(await currentReviewer());
-	const { orgs, installUrl } = $derived(await reviewableOrgs());
+	const [reviewer, { orgs, installUrl }] = $derived(
+		await Promise.all([currentReviewer(), reviewableOrgs()])
+	);
 </script>
 
 {#if !reviewer}
