@@ -1,6 +1,6 @@
 # 4. Data model: shared public data, per-tenant decisions, stored signal values, and bounded retention
 
-- Status: accepted
+- Status: accepted; when cases are created superseded by ADR-0009
 - Date: 2026-10-02
 
 ## Context
