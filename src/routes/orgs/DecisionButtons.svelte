@@ -33,8 +33,7 @@
 			<input type="hidden" name="caseId" value={caseId} />
 			<input type="hidden" name="action" value="block" />
 			<input type="hidden" name="then" value={then} />
-			<Button type="button" {size} color="danger" onclick={() => (confirming = true)}>Block…</Button
-			>
+			<Button type="button" {size} color="danger" onclick={() => (confirming = true)}>Block</Button>
 		</form>
 	{/if}
 </HStack>
