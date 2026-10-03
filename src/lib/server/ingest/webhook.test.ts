@@ -235,6 +235,42 @@ describe('webhook ingest', () => {
 		]);
 	});
 
+	it('keeps the earlier text of an edited comment, once per edit', async () => {
+		const edited = {
+			...discussionComment({ id: 'DC_EDIT' }),
+			action: 'edited',
+			changes: { body: { from: 'Have you tried turning it off and on again?' } }
+		};
+		edited.comment = {
+			...edited.comment,
+			body: 'Have you tried https://spam.example?',
+			updated_at: '2026-10-01T12:00:00Z'
+		} as typeof edited.comment;
+		await deliver('discussion_comment', edited);
+		await deliver('discussion_comment', edited);
+
+		const comment = await db
+			.selectFrom('comments')
+			.select(['body', 'edited_at'])
+			.where('id', '=', 'DC_EDIT')
+			.executeTakeFirstOrThrow();
+		expect(comment).toEqual({
+			body: 'Have you tried https://spam.example?',
+			edited_at: new Date('2026-10-01T12:00:00Z')
+		});
+		const edits = await db
+			.selectFrom('comment_edits')
+			.select(['body', 'edited_at'])
+			.where('comment_id', '=', 'DC_EDIT')
+			.execute();
+		expect(edits).toEqual([
+			{
+				body: 'Have you tried turning it off and on again?',
+				edited_at: new Date('2026-10-01T12:00:00Z')
+			}
+		]);
+	});
+
 	it('marks an installation as uninstalled', async () => {
 		await deliver('installation', { action: 'deleted', installation: { id: 10, account: owner } });
 		const { uninstalled_at } = await db

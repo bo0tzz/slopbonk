@@ -99,17 +99,28 @@
 		<Stack gap={6} class="min-w-0">
 			<Panel title={`In ${account.org}`}>
 				<Stack gap={2}>
-					{#each account.commentsHere as comment (comment.createdAt.getTime())}
+					{#each account.commentsHere as comment (comment.id)}
 						<details class="group rounded-lg bg-subtle p-3">
 							<summary class="cursor-pointer list-none">
 								<Text size="small" color="muted">
 									<span class="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
 									<ExternalLink href={comment.url}>{comment.repository}</ExternalLink>
 									{#if comment.category}· {comment.category}{/if} · {when(comment.createdAt)}
+									{#if comment.edits.length}
+										· <span class="font-semibold">edited</span>
+									{/if}
 								</Text>
 								<Text class="mt-1 truncate group-open:hidden">{comment.body}</Text>
 							</summary>
 							<Text class="mt-1 whitespace-pre-line">{comment.body}</Text>
+							{#each comment.edits as edit (edit.replacedAt.getTime())}
+								<div class="mt-3 border-l-2 border-light-300 pl-3">
+									<Text size="small" color="muted"
+										>Earlier version, until {when(edit.replacedAt)}</Text
+									>
+									<Text class="mt-1 whitespace-pre-line text-light-600">{edit.body}</Text>
+								</div>
+							{/each}
 						</details>
 					{/each}
 				</Stack>

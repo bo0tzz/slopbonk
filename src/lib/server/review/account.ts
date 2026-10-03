@@ -17,6 +17,7 @@ import { MAX_SCORE, stats, type Stat } from './stats';
 const ACTIVITY_DAYS = 30;
 
 export interface EvidenceComment {
+	id: string;
 	body: string;
 	createdAt: Date;
 	repository: string;
@@ -43,7 +44,8 @@ export interface AccountEvidence {
 	evaluatedAt: Date | null;
 	dataAsOf: Date | null;
 	stats: Stat[];
-	commentsHere: EvidenceComment[];
+	/** Newest first, each with its earlier versions, newest first. */
+	commentsHere: (EvidenceComment & { edits: { body: string; replacedAt: Date }[] })[];
 	/** Outward comments per day for the last 30 days, oldest first. */
 	activity: { day: string; comments: number }[];
 	burst: EvidenceComment[];
@@ -110,6 +112,7 @@ export async function accountEvidence(
 			.innerJoin('threads', 'threads.id', 'comments.thread_id')
 			.innerJoin('repositories', 'repositories.id', 'threads.repository_id')
 			.select([
+				'comments.id',
 				'comments.body',
 				'comments.created_at',
 				'comments.author_association',
@@ -134,6 +137,7 @@ export async function accountEvidence(
 		threadAuthorId: row.author_id,
 		authorAssociation: row.author_association,
 		answerable: row.category_answerable,
+		id: row.id,
 		body: row.body,
 		repository: `${row.owner_login}/${row.name}`,
 		url: threadUrl(row.owner_login, row.name, row.kind, row.number),
@@ -141,10 +145,25 @@ export async function accountEvidence(
 		category: row.category_name
 	}));
 
-	const commentsHere = rows
-		.filter((row) => row.repositoryOwnerId === installation.accountId)
-		.reverse()
-		.map(evidence);
+	const here = rows.filter((row) => row.repositoryOwnerId === installation.accountId).reverse();
+	const edits = here.length
+		? await db
+				.selectFrom('comment_edits')
+				.select(['comment_id', 'body', 'edited_at'])
+				.where(
+					'comment_id',
+					'in',
+					here.map((row) => row.id)
+				)
+				.orderBy('edited_at', 'desc')
+				.execute()
+		: [];
+	const commentsHere = here.map((row) => ({
+		...evidence(row),
+		edits: edits
+			.filter((edit) => edit.comment_id === row.id)
+			.map((edit) => ({ body: edit.body, replacedAt: new Date(edit.edited_at) }))
+	}));
 	const outward = outwardComments(found.user_id, rows);
 	const burst = findBurst(outward, DAY, BURST_MIN_REPOS).map(evidence);
 
@@ -213,6 +232,7 @@ function overall(items: { status: OutboxStatus; last_error: string | null }[]): 
 
 function evidence(row: Row): EvidenceComment {
 	return {
+		id: row.id,
 		body: row.body,
 		createdAt: row.createdAt,
 		repository: row.repository,

@@ -3,12 +3,14 @@ import {
 	ForeignKeyColumn,
 	PrimaryColumn,
 	Table,
+	Unique,
 	type Generated,
 	type Timestamp
 } from '@immich/sql-tools';
 import { CommentTable } from './comment.table.js';
 
 @Table({ name: 'comment_edits' })
+@Unique({ columns: ['comment_id', 'edited_at'] })
 export class CommentEditTable {
 	@PrimaryColumn({ type: 'bigint', identity: true })
 	id!: Generated<number>;

@@ -81,6 +81,18 @@ export async function storeThread(db: Db, thread: ThreadRecord) {
 		.execute();
 }
 
+/** The text a comment had before the edit at `edited_at`. */
+export async function storeCommentEdit(
+	db: Db,
+	edit: { comment_id: string; body: string; edited_at: string }
+) {
+	await db
+		.insertInto('comment_edits')
+		.values(edit)
+		.onConflict((oc) => oc.columns(['comment_id', 'edited_at']).doNothing())
+		.execute();
+}
+
 /** A comment seen again keeps its original source, but its text and answer state are refreshed. */
 export async function storeComment(db: Db, comment: CommentRecord) {
 	await db

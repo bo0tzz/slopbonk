@@ -2,7 +2,7 @@ import { Webhooks, type EmitterWebhookEvent } from '@octokit/webhooks';
 import type { Db } from '../db';
 import type { JobSender } from '../queue';
 import { backfillQueue, evaluateQueue, jobKey } from '../jobs';
-import { storeComment, storeRepository, storeThread, storeUser } from './store';
+import { storeComment, storeCommentEdit, storeRepository, storeThread, storeUser } from './store';
 
 interface Deps {
 	db: Db;
@@ -11,7 +11,12 @@ interface Deps {
 	onInstallationsChanged(): void;
 }
 
-type CommentEvent = EmitterWebhookEvent<'discussion_comment.created' | 'issue_comment.created'>;
+type CommentEvent = EmitterWebhookEvent<
+	| 'discussion_comment.created'
+	| 'discussion_comment.edited'
+	| 'issue_comment.created'
+	| 'issue_comment.edited'
+>;
 
 export async function handleWebhookRequest(request: Request, deps: Deps): Promise<Response> {
 	const id = request.headers.get('x-github-delivery');
@@ -57,8 +62,14 @@ export async function handleWebhookRequest(request: Request, deps: Deps): Promis
 	webhooks.on('installation_target.renamed', (event) =>
 		recordRename(deps.db, event.payload.installation.id, event.payload.account)
 	);
-	webhooks.on(['discussion_comment.created', 'issue_comment.created'], (event) =>
-		recordComment(deps, event)
+	webhooks.on(
+		[
+			'discussion_comment.created',
+			'discussion_comment.edited',
+			'issue_comment.created',
+			'issue_comment.edited'
+		],
+		(event) => recordComment(deps, event)
 	);
 	await webhooks.receive({ id, name, payload: JSON.parse(body) } as EmitterWebhookEvent);
 
@@ -173,9 +184,16 @@ async function recordComment({ db, queue }: Deps, event: CommentEvent) {
 		is_answer: false,
 		body: comment.body,
 		created_at: comment.created_at,
-		edited_at: null,
+		edited_at: payload.action === 'edited' ? comment.updated_at : null,
 		source: 'webhook'
 	});
+	if (payload.action === 'edited' && payload.changes.body) {
+		await storeCommentEdit(db, {
+			comment_id: comment.node_id,
+			body: payload.changes.body.from,
+			edited_at: comment.updated_at
+		});
+	}
 
 	const job = { installationId, userId: author.id };
 	await queue.send(evaluateQueue, job, { singletonKey: jobKey(job) });
