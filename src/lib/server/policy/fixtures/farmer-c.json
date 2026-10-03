@@ -1,0 +1,474 @@
+[
+	{
+		"createdAt": "2026-08-18T00:34:57Z",
+		"repositoryId": 126,
+		"repositoryOwnerId": 127,
+		"threadAuthorId": 128,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-08-20T15:30:34Z",
+		"repositoryId": 111,
+		"repositoryOwnerId": 112,
+		"threadAuthorId": 113,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-08-20T15:39:29Z",
+		"repositoryId": 123,
+		"repositoryOwnerId": 124,
+		"threadAuthorId": 125,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-08-20T16:26:50Z",
+		"repositoryId": 120,
+		"repositoryOwnerId": 121,
+		"threadAuthorId": 122,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-08-20T16:42:08Z",
+		"repositoryId": 117,
+		"repositoryOwnerId": 118,
+		"threadAuthorId": 119,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-08-21T07:58:14Z",
+		"repositoryId": 114,
+		"repositoryOwnerId": 115,
+		"threadAuthorId": 116,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-08-21T08:43:48Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-08-23T01:11:25Z",
+		"repositoryId": 111,
+		"repositoryOwnerId": 112,
+		"threadAuthorId": 113,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-09-12T22:47:02Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-09-15T13:52:17Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-09-24T23:55:38Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-09-30T23:44:30Z",
+		"repositoryId": 108,
+		"repositoryOwnerId": 109,
+		"threadAuthorId": 110,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-09-30T23:48:55Z",
+		"repositoryId": 105,
+		"repositoryOwnerId": 106,
+		"threadAuthorId": 107,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:14:22Z",
+		"repositoryId": 102,
+		"repositoryOwnerId": 103,
+		"threadAuthorId": 104,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:14:51Z",
+		"repositoryId": 99,
+		"repositoryOwnerId": 100,
+		"threadAuthorId": 101,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:15:00Z",
+		"repositoryId": 57,
+		"repositoryOwnerId": 58,
+		"threadAuthorId": 59,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:16:26Z",
+		"repositoryId": 51,
+		"repositoryOwnerId": 52,
+		"threadAuthorId": 53,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:16:36Z",
+		"repositoryId": 96,
+		"repositoryOwnerId": 97,
+		"threadAuthorId": 98,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:17:50Z",
+		"repositoryId": 54,
+		"repositoryOwnerId": 55,
+		"threadAuthorId": 56,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:18:02Z",
+		"repositoryId": 51,
+		"repositoryOwnerId": 52,
+		"threadAuthorId": 53,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:39:57Z",
+		"repositoryId": 93,
+		"repositoryOwnerId": 94,
+		"threadAuthorId": 95,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:40:08Z",
+		"repositoryId": 90,
+		"repositoryOwnerId": 91,
+		"threadAuthorId": 92,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:40:20Z",
+		"repositoryId": 87,
+		"repositoryOwnerId": 88,
+		"threadAuthorId": 89,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:41:49Z",
+		"repositoryId": 84,
+		"repositoryOwnerId": 85,
+		"threadAuthorId": 86,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:41:59Z",
+		"repositoryId": 81,
+		"repositoryOwnerId": 82,
+		"threadAuthorId": 83,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:43:09Z",
+		"repositoryId": 78,
+		"repositoryOwnerId": 79,
+		"threadAuthorId": 80,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T04:43:19Z",
+		"repositoryId": 75,
+		"repositoryOwnerId": 76,
+		"threadAuthorId": 77,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T05:01:38Z",
+		"repositoryId": 72,
+		"repositoryOwnerId": 73,
+		"threadAuthorId": 74,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T05:01:48Z",
+		"repositoryId": 69,
+		"repositoryOwnerId": 70,
+		"threadAuthorId": 71,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T05:03:02Z",
+		"repositoryId": 66,
+		"repositoryOwnerId": 67,
+		"threadAuthorId": 68,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T05:03:14Z",
+		"repositoryId": 63,
+		"repositoryOwnerId": 64,
+		"threadAuthorId": 65,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T05:03:58Z",
+		"repositoryId": 60,
+		"repositoryOwnerId": 61,
+		"threadAuthorId": 62,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T06:40:26Z",
+		"repositoryId": 57,
+		"repositoryOwnerId": 58,
+		"threadAuthorId": 59,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T06:40:41Z",
+		"repositoryId": 51,
+		"repositoryOwnerId": 52,
+		"threadAuthorId": 53,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:23:44Z",
+		"repositoryId": 54,
+		"repositoryOwnerId": 55,
+		"threadAuthorId": 56,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:24:59Z",
+		"repositoryId": 51,
+		"repositoryOwnerId": 52,
+		"threadAuthorId": 53,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:33:52Z",
+		"repositoryId": 48,
+		"repositoryOwnerId": 49,
+		"threadAuthorId": 50,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:34:52Z",
+		"repositoryId": 45,
+		"repositoryOwnerId": 46,
+		"threadAuthorId": 47,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:35:23Z",
+		"repositoryId": 42,
+		"repositoryOwnerId": 43,
+		"threadAuthorId": 44,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:37:56Z",
+		"repositoryId": 39,
+		"repositoryOwnerId": 40,
+		"threadAuthorId": 41,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:38:13Z",
+		"repositoryId": 36,
+		"repositoryOwnerId": 37,
+		"threadAuthorId": 38,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:39:12Z",
+		"repositoryId": 33,
+		"repositoryOwnerId": 34,
+		"threadAuthorId": 35,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:41:17Z",
+		"repositoryId": 30,
+		"repositoryOwnerId": 31,
+		"threadAuthorId": 32,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:41:22Z",
+		"repositoryId": 27,
+		"repositoryOwnerId": 28,
+		"threadAuthorId": 29,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:44:33Z",
+		"repositoryId": 24,
+		"repositoryOwnerId": 25,
+		"threadAuthorId": 26,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T08:44:53Z",
+		"repositoryId": 21,
+		"repositoryOwnerId": 22,
+		"threadAuthorId": 23,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T21:01:32Z",
+		"repositoryId": 18,
+		"repositoryOwnerId": 19,
+		"threadAuthorId": 20,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T21:03:44Z",
+		"repositoryId": 15,
+		"repositoryOwnerId": 16,
+		"threadAuthorId": 17,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T21:06:15Z",
+		"repositoryId": 12,
+		"repositoryOwnerId": 13,
+		"threadAuthorId": 14,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T21:30:24Z",
+		"repositoryId": 8,
+		"repositoryOwnerId": 9,
+		"threadAuthorId": 11,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T21:32:24Z",
+		"repositoryId": 8,
+		"repositoryOwnerId": 9,
+		"threadAuthorId": 10,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T21:34:18Z",
+		"repositoryId": 5,
+		"repositoryOwnerId": 6,
+		"threadAuthorId": 7,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-01T21:37:27Z",
+		"repositoryId": 2,
+		"repositoryOwnerId": 3,
+		"threadAuthorId": 4,
+		"authorAssociation": "NONE",
+		"answerable": true
+	},
+	{
+		"createdAt": "2026-10-02T22:01:40Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-10-02T22:13:35Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-10-03T00:54:39Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-10-03T01:54:07Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-10-03T02:05:13Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	},
+	{
+		"createdAt": "2026-10-03T02:17:05Z",
+		"repositoryId": 129,
+		"repositoryOwnerId": 1,
+		"threadAuthorId": 1,
+		"authorAssociation": "OWNER",
+		"answerable": false
+	}
+]

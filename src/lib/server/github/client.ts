@@ -140,6 +140,26 @@ export function createApp(config: GithubAppConfig): App {
 	return new App({ appId: config.appId, privateKey: config.privateKey, Octokit: ThrottledOctokit });
 }
 
+/**
+ * GitHub answers with data plus errors when individual items are inaccessible (e.g. a discussion
+ * that was since deleted); those items come back as null and are skipped. Only fail without data.
+ */
+async function graphqlAllowingPartial<T>(
+	octokit: Octokit,
+	query: string,
+	variables: Record<string, unknown>
+): Promise<T> {
+	try {
+		return await octokit.graphql<T>(query, variables);
+	} catch (error) {
+		const data = (error as { data?: T }).data;
+		if (data) {
+			return data;
+		}
+		throw error;
+	}
+}
+
 export async function installationClient(app: App, installationId: number): Promise<GithubClient> {
 	const octokit = await app.getInstallationOctokit(installationId);
 	return {
@@ -155,15 +175,15 @@ export async function installationClient(app: App, installationId: number): Prom
 			}
 		},
 		async discussionComments(login, cursor) {
-			const data = await octokit.graphql<{
+			const data = await graphqlAllowingPartial<{
 				user: { repositoryDiscussionComments: Connection<DiscussionCommentNode> } | null;
-			}>(DISCUSSION_COMMENTS, { login, cursor });
+			}>(octokit, DISCUSSION_COMMENTS, { login, cursor });
 			return toPage(data.user?.repositoryDiscussionComments);
 		},
 		async issueComments(login, cursor) {
-			const data = await octokit.graphql<{
+			const data = await graphqlAllowingPartial<{
 				user: { issueComments: Connection<IssueCommentNode> } | null;
-			}>(ISSUE_COMMENTS, { login, cursor });
+			}>(octokit, ISSUE_COMMENTS, { login, cursor });
 			return toPage(data.user?.issueComments);
 		}
 	};
