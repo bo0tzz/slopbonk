@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.1](https://github.com/bo0tzz/slopbonk/compare/v0.3.0...v0.3.1) (2026-10-03)
+
+
+### Bug Fixes
+
+* count comments that are already hidden as hidden, instead of failing ([debde2f](https://github.com/bo0tzz/slopbonk/commit/debde2f7a184669d92e245e007655f37ec1d62f4))
+* **deps:** update dependency cookie@&lt;0.7.0 to v1 ([#14](https://github.com/bo0tzz/slopbonk/issues/14)) ([255d9dd](https://github.com/bo0tzz/slopbonk/commit/255d9ddeb1700cdf3c2f2ec77ebdb38ee768d532))
+* **deps:** update dependency eslint to v10.12.0 ([#7](https://github.com/bo0tzz/slopbonk/issues/7)) ([4d91790](https://github.com/bo0tzz/slopbonk/commit/4d91790aaead84bd4bb965f33eb4edd35001d339))
+* **deps:** update dependency pg-boss to v12.36.0 ([#8](https://github.com/bo0tzz/slopbonk/issues/8)) ([248fd5f](https://github.com/bo0tzz/slopbonk/commit/248fd5f1121da0539512a0de1f42b24bd2a1cf60))
+* **deps:** update pnpm to v12.8.1 ([#10](https://github.com/bo0tzz/slopbonk/issues/10)) ([24595c3](https://github.com/bo0tzz/slopbonk/commit/24595c372071e6027836536925997d8f7bbcb12f))
+* **mise:** update tool pnpm to 12 ([#11](https://github.com/bo0tzz/slopbonk/issues/11)) ([b1160ce](https://github.com/bo0tzz/slopbonk/commit/b1160ceffab09c6482df863a90d94d745b96670f))
+
 ## [0.3.0](https://github.com/bo0tzz/slopbonk/compare/v0.2.0...v0.3.0) (2026-10-03)
 
 
