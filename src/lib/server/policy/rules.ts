@@ -10,8 +10,6 @@ export interface Rule {
 
 export interface Ruleset {
 	version: string;
-	/** Score at which an account enters the review queue. */
-	queueThreshold: number;
 	rules: Rule[];
 }
 
@@ -21,7 +19,6 @@ export interface Ruleset {
  */
 export const RULESET: Ruleset = {
 	version: '1',
-	queueThreshold: 3,
 	rules: [
 		{ name: 'burst_across_repos', signal: 'peak_repos_24h', atLeast: 3, weight: 1 },
 		{ name: 'repos_within_a_minute', signal: 'peak_repos_1m', atLeast: 3, weight: 1 },

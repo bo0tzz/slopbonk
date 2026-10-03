@@ -5,9 +5,11 @@ import { databaseUrl, githubApp } from './env';
 import { outboxWorker } from './act/workers';
 import { requeuePending } from './act/outbox';
 import {
+	appAuth,
 	createApp,
 	installationActions,
 	installationClient,
+	type GithubAuth,
 	type GithubClient
 } from './github/client';
 import { fetchHistoryWorker } from './ingest/workers';
@@ -19,6 +21,7 @@ export interface Services {
 	db: Db;
 	queue: JobQueue;
 	clientFor: (installationId: number) => Promise<GithubClient>;
+	auth: GithubAuth;
 	webhookSecret: string;
 }
 
@@ -40,7 +43,7 @@ export async function startServices(): Promise<Services> {
 	]);
 	await requeuePending(db, queue);
 
-	services = { db, queue, clientFor, webhookSecret: github.webhookSecret };
+	services = { db, queue, clientFor, auth: appAuth(app), webhookSecret: github.webhookSecret };
 	return services;
 }
 

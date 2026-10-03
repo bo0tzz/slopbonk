@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { QUEUE_THRESHOLD } from '../constants';
 import { RULESET, score } from './rules';
 import {
 	burstAnswerShare,
@@ -90,14 +91,14 @@ describe('starting ruleset on real accounts', () => {
 	it.each(['farmer-a', 'farmer-b', 'farmer-c', 'farmer-d', 'farmer-e'])(
 		'queues comment farmer %s',
 		(name) => {
-			expect(total(name)).toBeGreaterThanOrEqual(RULESET.queueThreshold);
+			expect(total(name)).toBeGreaterThanOrEqual(QUEUE_THRESHOLD);
 		}
 	);
 
 	it.each(['human-a', 'human-b', 'human-c', 'human-d', 'human-e'])(
 		'leaves busy maintainer %s alone',
 		(name) => {
-			expect(total(name)).toBeLessThan(RULESET.queueThreshold);
+			expect(total(name)).toBeLessThan(QUEUE_THRESHOLD);
 		}
 	);
 });

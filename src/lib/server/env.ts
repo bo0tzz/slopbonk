@@ -12,6 +12,11 @@ export function databaseUrl(): string {
 	return required('DATABASE_URL');
 }
 
+/** Public URL of this instance, without trailing slash; GitHub redirects reviewers back to it. */
+export function baseUrl(): string {
+	return required('BASE_URL').replace(/\/$/, '');
+}
+
 export interface GithubAppConfig {
 	appId: number;
 	slug: string;

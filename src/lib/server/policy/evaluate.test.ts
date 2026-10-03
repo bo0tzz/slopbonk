@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { QUEUE_THRESHOLD } from '../constants';
 import { createDb, type Db } from '../db';
 import { migrateToLatest } from '../db/migrate';
 import { createTestDatabase } from '../testing/database';
 import { evaluate } from './evaluate';
-import { RULESET } from './rules';
 
 const now = new Date('2026-10-03T12:00:00Z');
 const minutesAgo = (minutes: number) => new Date(now.getTime() - minutes * 60_000);
@@ -168,7 +168,7 @@ describe('evaluate', () => {
 			.where('user_id', '=', 5)
 			.executeTakeFirstOrThrow();
 		expect(caseRow).toMatchObject({ state: 'open', score: 4 });
-		expect(caseRow.score).toBeGreaterThanOrEqual(RULESET.queueThreshold);
+		expect(caseRow.score).toBeGreaterThanOrEqual(QUEUE_THRESHOLD);
 
 		const values = await db
 			.selectFrom('signal_values')
