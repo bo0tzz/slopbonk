@@ -1,3 +1,37 @@
 [tools]
 node = "26"
 pnpm = "12"
+
+[env]
+_.path = ["./node_modules/.bin"]
+_.file = ".env"
+
+[tasks.dev]
+run = "vite dev"
+
+[tasks.build]
+run = "vite build"
+
+[tasks.preview]
+run = "vite preview"
+
+[tasks.check]
+run = ["svelte-kit sync", "svelte-check --tsconfig ./tsconfig.json"]
+
+[tasks.lint]
+run = ["prettier --check .", "eslint ."]
+
+[tasks.format]
+run = "prettier --write ."
+
+[tasks.test]
+run = "vitest --run --passWithNoTests"
+
+[tasks."db:generate"]
+description = "Generate a migration from changes to the schema classes"
+usage = 'arg "<name>" help="Name for the migration, e.g. AddCommentEdits"'
+run = "scripts/migrations.sh generate ${usage_name?}"
+
+[tasks."db:check"]
+description = "Fail if the schema classes have changes no migration covers"
+run = "scripts/migrations.sh check"

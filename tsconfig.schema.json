@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "es2023",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"experimentalDecorators": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"rootDir": "src/lib/server/db",
+		"outDir": ".sql-tools"
+	},
+	"include": ["src/lib/server/db/schema", "src/lib/server/db/migrations"]
+}

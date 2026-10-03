@@ -34,6 +34,13 @@ export default defineConfig(
 		}
 	},
 	{
+		files: ['src/lib/server/db/migrations/**'],
+		rules: {
+			// sql-tools generates migrations typed against Kysely<any>.
+			'@typescript-eslint/no-explicit-any': 'off'
+		}
+	},
+	{
 		// Override or add rule settings here, such as:
 		// 'svelte/button-has-type': 'error'
 		rules: {}
