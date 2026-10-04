@@ -67,7 +67,6 @@
 		</text>
 	</svg>
 	<table class="sr-only">
-		<caption>Comments per day</caption>
 		<tbody>
 			{#each days as d (d.day)}
 				<tr><th scope="row">{d.day}</th><td>{d.comments}</td></tr>
