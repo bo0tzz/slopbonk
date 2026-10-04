@@ -8,6 +8,16 @@
 	rebaseWhen: 'conflicted',
 	packageRules: [
 		{
+			description: 'Minor and patch updates arrive together; the groups below take precedence',
+			groupName: 'non-major dependencies',
+			matchUpdateTypes: ['minor', 'patch']
+		},
+		{
+			groupName: 'github actions',
+			matchManagers: ['github-actions'],
+			matchUpdateTypes: ['minor', 'patch', 'digest', 'pin']
+		},
+		{
 			description: 'Svelte ecosystem; @immich/ui tracks Svelte versions',
 			groupName: 'svelte',
 			matchPackageNames: [
@@ -48,10 +58,18 @@
 			matchPackageNames: ['/^@octokit//']
 		},
 		{
-			description: 'The image runs the same Node as development',
+			groupName: 'tailwind',
+			matchPackageNames: ['tailwindcss', '/^@tailwindcss//', 'prettier-plugin-tailwindcss']
+		},
+		{
+			description: 'The image runs the same Node as development, and the types follow it',
 			groupName: 'node',
-			matchDepNames: ['node'],
-			matchManagers: ['mise', 'dockerfile']
+			matchDepNames: ['node', '@types/node']
+		},
+		{
+			description: 'package.json and mise pin the same pnpm',
+			groupName: 'pnpm',
+			matchDepNames: ['pnpm']
 		},
 		{
 			matchManagers: ['mise'],
