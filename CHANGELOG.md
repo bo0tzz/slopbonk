@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.0](https://github.com/bo0tzz/slopbonk/compare/v0.3.1...v0.4.0) (2026-10-10)
+
+
+### Features
+
+* unmark hidden comments that were accepted as a discussion's answer ([2de1f9c](https://github.com/bo0tzz/slopbonk/commit/2de1f9cd228e9d67fc290224ce08b720d0bffc72))
+
+
+### Bug Fixes
+
+* **deps:** update dependency svelte to v5.57.2 ([#26](https://github.com/bo0tzz/slopbonk/issues/26)) ([6da8019](https://github.com/bo0tzz/slopbonk/commit/6da801915b59b795e3d7b8cb07c68748137f5d4d))
+* **deps:** update dependency vitest to v5 ([#16](https://github.com/bo0tzz/slopbonk/issues/16)) ([741534c](https://github.com/bo0tzz/slopbonk/commit/741534cc373794fbda94c2d729dd926277d586cf))
+* **deps:** update eslint ([#22](https://github.com/bo0tzz/slopbonk/issues/22)) ([b944b81](https://github.com/bo0tzz/slopbonk/commit/b944b813b1b6008d72a8a1583b05541d8c0f2be2))
+* **deps:** update github actions ([#21](https://github.com/bo0tzz/slopbonk/issues/21)) ([7e3d378](https://github.com/bo0tzz/slopbonk/commit/7e3d37880fd2d7ee225dc7f31bb6e05049f7052a))
+* **deps:** update non-major dependencies ([#23](https://github.com/bo0tzz/slopbonk/issues/23)) ([fd39d94](https://github.com/bo0tzz/slopbonk/commit/fd39d94844491824caa7781265791632b478a9a5))
+* **deps:** update pnpm to v12.10.1 ([#20](https://github.com/bo0tzz/slopbonk/issues/20)) ([6e561c7](https://github.com/bo0tzz/slopbonk/commit/6e561c7099a789e82a63b901222e6d86baca48de))
+* **deps:** update postgres:18 docker digest to 74935e7 ([#25](https://github.com/bo0tzz/slopbonk/issues/25)) ([afac2f6](https://github.com/bo0tzz/slopbonk/commit/afac2f6d47f7ad741fc2a1eba318b60b3b444b36))
+* **mise:** update node ([#24](https://github.com/bo0tzz/slopbonk/issues/24)) ([5696af5](https://github.com/bo0tzz/slopbonk/commit/5696af5917d33426f0f696a4f1ee42bef3f21bfb))
+
 ## [0.3.1](https://github.com/bo0tzz/slopbonk/compare/v0.3.0...v0.3.1) (2026-10-03)
 
 
