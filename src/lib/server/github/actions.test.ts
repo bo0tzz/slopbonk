@@ -20,11 +20,12 @@ const couldNotMinimize = {
 };
 
 describe('minimizeComment', () => {
-	it('hides the comment', async () => {
-		const { octokit } = octokitAnswering({
-			data: { minimizeComment: { minimizedComment: { isMinimized: true } } }
+	it('hides the comment, leaving it marked as it was when it is not an answer', async () => {
+		const { octokit, queries } = octokitAnswering({
+			data: { minimizeComment: { minimizedComment: { isMinimized: true, isAnswer: false } } }
 		});
 		expect(await minimizeComment(octokit, 'DC_1')).toBe(true);
+		expect(queries).toHaveLength(1);
 	});
 
 	it('counts a comment someone already hid as hidden', async () => {
@@ -40,6 +41,26 @@ describe('minimizeComment', () => {
 			data: { node: { isMinimized: false } }
 		});
 		await expect(minimizeComment(octokit, 'DC_1')).rejects.toThrow('Could not minimize comment');
+	});
+
+	it("also unmarks a hidden comment that was accepted as the discussion's answer", async () => {
+		const { octokit, queries } = octokitAnswering(
+			{ data: { minimizeComment: { minimizedComment: { isMinimized: true, isAnswer: true } } } },
+			{ data: { unmarkDiscussionCommentAsAnswer: { discussion: { id: 'D_1' } } } }
+		);
+		expect(await minimizeComment(octokit, 'DC_1')).toBe(true);
+		expect(queries[1]).toContain('unmarkDiscussionCommentAsAnswer');
+	});
+
+	it('unmarks an answer someone already hid', async () => {
+		const { octokit, queries } = octokitAnswering(
+			couldNotMinimize,
+			{ data: { node: { isMinimized: true, isAnswer: true } } },
+			{ data: { unmarkDiscussionCommentAsAnswer: { discussion: { id: 'D_1' } } } }
+		);
+		expect(await minimizeComment(octokit, 'DC_1')).toBe(true);
+		expect(queries).toHaveLength(3);
+		expect(queries[2]).toContain('unmarkDiscussionCommentAsAnswer');
 	});
 
 	it('reports a comment that no longer exists', async () => {

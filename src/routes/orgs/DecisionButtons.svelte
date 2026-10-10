@@ -58,6 +58,8 @@
 	<p>They'll be blocked from all of {org}'s repositories.</p>
 	<div class="mt-4 flex items-center gap-2">
 		<Checkbox id="hide-comments-{caseId}" bind:checked={hideComments} />
-		<Label for="hide-comments-{caseId}">Also hide their comments in {org}</Label>
+		<Label for="hide-comments-{caseId}"
+			>Also hide their comments in {org}, and unmark any accepted answers</Label
+		>
 	</div>
 {/snippet}

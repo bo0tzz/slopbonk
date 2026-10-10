@@ -5,20 +5,40 @@ import { installationOctokit } from './app';
 /** Writes slopbonk makes on an installation's behalf (act only). */
 export interface GithubActions {
 	blockUser(org: string, login: string): Promise<void>;
-	/** Hides a comment as spam; false when the comment no longer exists. */
+	/**
+	 * Hides a comment as spam, and unmarks it if it was accepted as a discussion's answer; false
+	 * when the comment no longer exists.
+	 */
 	minimizeComment(commentId: string): Promise<boolean>;
 }
 
 const MINIMIZE_COMMENT = `mutation($id: ID!) {
-	minimizeComment(input: { subjectId: $id, classifier: SPAM }) { minimizedComment { isMinimized } }
+	minimizeComment(input: { subjectId: $id, classifier: SPAM }) {
+		minimizedComment { isMinimized ... on DiscussionComment { isAnswer } }
+	}
 }`;
 
-const IS_MINIMIZED = `query($id: ID!) { node(id: $id) { ... on Minimizable { isMinimized } } }`;
+const COMMENT_STATE = `query($id: ID!) {
+	node(id: $id) { ... on Minimizable { isMinimized } ... on DiscussionComment { isAnswer } }
+}`;
+
+const UNMARK_ANSWER = `mutation($id: ID!) {
+	unmarkDiscussionCommentAsAnswer(input: { id: $id }) { discussion { id } }
+}`;
+
+interface CommentState {
+	isMinimized?: boolean;
+	isAnswer?: boolean;
+}
 
 export async function minimizeComment(octokit: Octokit, commentId: string): Promise<boolean> {
+	let state: CommentState | null;
 	try {
-		await octokit.graphql(MINIMIZE_COMMENT, { id: commentId });
-		return true;
+		const result = await octokit.graphql<{ minimizeComment: { minimizedComment: CommentState } }>(
+			MINIMIZE_COMMENT,
+			{ id: commentId }
+		);
+		state = result.minimizeComment.minimizedComment;
 	} catch (error) {
 		const errors = (error as { errors?: { type?: string }[] }).errors;
 		if (errors?.some((e) => e.type === 'NOT_FOUND')) {
@@ -26,15 +46,17 @@ export async function minimizeComment(octokit: Octokit, commentId: string): Prom
 		}
 		// GitHub refuses to minimize a comment that is already hidden, e.g. by a maintainer, and
 		// only says "Could not minimize comment".
-		const { node } = await octokit.graphql<{ node: { isMinimized?: boolean } | null }>(
-			IS_MINIMIZED,
-			{ id: commentId }
-		);
-		if (node?.isMinimized) {
-			return true;
+		({ node: state } = await octokit.graphql<{ node: CommentState | null }>(COMMENT_STATE, {
+			id: commentId
+		}));
+		if (!state?.isMinimized) {
+			throw error;
 		}
-		throw error;
 	}
+	if (state?.isAnswer) {
+		await octokit.graphql(UNMARK_ANSWER, { id: commentId });
+	}
+	return true;
 }
 
 export async function installationActions(
