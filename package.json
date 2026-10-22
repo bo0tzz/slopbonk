@@ -10,7 +10,7 @@
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@immich/sql-tools": "^0.6.4",
-		"@immich/ui": "^0.90.0",
+		"@immich/ui": "^0.91.0",
 		"@mdi/js": "^7.4.47",
 		"@sveltejs/adapter-node": "^5.5.7",
 		"@sveltejs/kit": "^2.70.3",
