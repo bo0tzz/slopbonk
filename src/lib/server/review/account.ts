@@ -48,6 +48,8 @@ export interface AccountEvidence {
 	stats: Stat[];
 	/** Newest first, each with its earlier versions, newest first. */
 	commentsHere: (EvidenceComment & { edits: { body: string; replacedAt: Date }[] })[];
+	/** All outward comments in the history, and how many repositories they span. */
+	spread: { comments: number; repositories: number; since: Date | null };
 	/** Outward comments per day for the last 30 days, oldest first. */
 	activity: { day: string; comments: number }[];
 	burst: EvidenceComment[];
@@ -204,6 +206,11 @@ export async function accountEvidence(
 		dataAsOf: evaluation ? new Date(evaluation.data_as_of) : null,
 		stats: shown,
 		commentsHere,
+		spread: {
+			comments: outward.length,
+			repositories: new Set(outward.map((c) => c.repositoryId)).size,
+			since: outward[0]?.createdAt ?? null
+		},
 		activity: dailyActivity(outward, now),
 		burst,
 		decisions: decisions.map((d) => {

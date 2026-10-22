@@ -135,6 +135,14 @@
 			</Panel>
 
 			<Panel title="Across GitHub">
+				{#if account.spread.since}
+					<Text fontWeight="semi-bold" class="mb-4">
+						{account.spread.comments} comment{account.spread.comments === 1 ? '' : 's'} in
+						{account.spread.repositories}
+						repositor{account.spread.repositories === 1 ? 'y' : 'ies'} since
+						{account.spread.since.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+					</Text>
+				{/if}
 				<Text size="small" color="muted">Comments per day over the last 30 days</Text>
 				<div class="mt-2"><ActivityChart days={account.activity} /></div>
 				{#if account.burst.length > 0}
