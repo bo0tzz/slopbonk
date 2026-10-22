@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.0](https://github.com/bo0tzz/slopbonk/compare/v0.4.0...v0.5.0) (2026-10-22)
+
+
+### Features
+
+* show per-day counts on hover and an account's repository spread ([9e4b956](https://github.com/bo0tzz/slopbonk/commit/9e4b9569ead0331265df855599d18fb7668e16c0))
+
+
+### Bug Fixes
+
+* **deps:** update dependency vitest to v5.0.5 ([#32](https://github.com/bo0tzz/slopbonk/issues/32)) ([016f5ee](https://github.com/bo0tzz/slopbonk/commit/016f5ee7b77f8ff5925114fc8ec357a189b0c231))
+* **deps:** update eslint ([#31](https://github.com/bo0tzz/slopbonk/issues/31)) ([76d76ee](https://github.com/bo0tzz/slopbonk/commit/76d76ee99e91d716562c5a54868d2f92befd6578))
+* **deps:** update jdx/mise-action action to v5.2.2 ([#33](https://github.com/bo0tzz/slopbonk/issues/33)) ([de58a48](https://github.com/bo0tzz/slopbonk/commit/de58a487a5278b523508d49d6734aa45d75226b3))
+* **deps:** update node ([#29](https://github.com/bo0tzz/slopbonk/issues/29)) ([ad95182](https://github.com/bo0tzz/slopbonk/commit/ad95182116ad80d52933f6b0df6a29d2ec1e1d86))
+* **deps:** update non-major dependencies ([#30](https://github.com/bo0tzz/slopbonk/issues/30)) ([8844223](https://github.com/bo0tzz/slopbonk/commit/8844223a922c20b5d831d53239811d042450e330))
+* **deps:** update pnpm to v12.15.0 ([#28](https://github.com/bo0tzz/slopbonk/issues/28)) ([06a0882](https://github.com/bo0tzz/slopbonk/commit/06a088252d44c9702b922e6e7cd11611c7035f85))
+* **deps:** update svelte ([#34](https://github.com/bo0tzz/slopbonk/issues/34)) ([f29a302](https://github.com/bo0tzz/slopbonk/commit/f29a302298dfae7b18108b53b58374a97e3405fa))
+* **deps:** upgrade to SvelteKit 3 and adapter-node 6 ([f8f8071](https://github.com/bo0tzz/slopbonk/commit/f8f8071eaebe0ef4c39375a5b7cec84da7827dc1))
+* don't mark accounts gone when the installation token request 404s ([e55e540](https://github.com/bo0tzz/slopbonk/commit/e55e5403a48fdc57a9d0b8c5c0b1c45c4111edf5))
+* give tests placeholder values for the required environment variables ([e24ba00](https://github.com/bo0tzz/slopbonk/commit/e24ba00546183ae7e760da08b413eed6224d5424))
+
 ## [0.4.0](https://github.com/bo0tzz/slopbonk/compare/v0.3.1...v0.4.0) (2026-10-10)
 
 
