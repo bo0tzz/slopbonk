@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Heading, Stack, Text } from '@immich/ui';
-	import Panel from '$lib/components/Panel.svelte';
-	import { onReviewChange } from '$lib/review-changes.svelte';
+	import Panel from '#lib/components/Panel.svelte';
+	import { onReviewChange } from '#lib/review-changes.svelte.js';
 	import { adminOverview } from './admin.remote';
 
 	const data = $derived(await adminOverview());

@@ -1,8 +1,8 @@
 import { randomBytes } from 'node:crypto';
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { baseUrl } from '$lib/server/env';
-import { getServices } from '$lib/server/services';
+import { baseUrl } from '#lib/server/env.js';
+import { getServices } from '#lib/server/services.js';
 
 export const GET: RequestHandler = ({ cookies, url }) => {
 	// The state cookie has to live on the same host as the registered callback URL. Compare hosts

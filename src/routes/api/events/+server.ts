@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { getServices } from '$lib/server/services';
+import { getServices } from '#lib/server/services.js';
 
 const KEEPALIVE_MS = 25 * 1000;
 

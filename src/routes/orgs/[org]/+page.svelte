@@ -3,8 +3,8 @@
 	import { resolve } from '$app/paths';
 	import { Badge, Heading, Stack, Text } from '@immich/ui';
 	import DecisionButtons from '../DecisionButtons.svelte';
-	import StatTile from '$lib/components/StatTile.svelte';
-	import { onReviewChange } from '$lib/review-changes.svelte';
+	import StatTile from '#lib/components/StatTile.svelte';
+	import { onReviewChange } from '#lib/review-changes.svelte.js';
 	import { orgQueue } from '../review.remote';
 
 	type Tab = 'review' | 'blocked' | 'dismissed';

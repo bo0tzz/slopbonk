@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import type { Cookies } from '@sveltejs/kit';
-import { dev } from '$app/environment';
-import { env } from '$env/dynamic/private';
+import { dev } from '$app/env';
+import { DEV_REVIEWER_SECRET, DEV_REVIEWER_ID } from '$app/env/private';
 import { REVIEWER_CACHE_MS } from '../constants';
 import type { Db } from '../db';
 import type { GithubAuth, UserIdentity, UserTokens } from '../github/auth';
@@ -88,9 +88,9 @@ export const DEV_REVIEWER_COOKIE = 'slopbonk_dev_reviewer';
  * Never active outside `vite dev`.
  */
 async function devReviewer(cookies: Cookies, db: Db): Promise<Reviewer | null> {
-	const secret = env.DEV_REVIEWER_SECRET;
+	const secret = DEV_REVIEWER_SECRET;
 	const given = cookies.get(DEV_REVIEWER_COOKIE);
-	if (!dev || !secret || !given || !env.DEV_REVIEWER_ID) {
+	if (!dev || !secret || !given || !DEV_REVIEWER_ID) {
 		return null;
 	}
 	const a = Buffer.from(secret);
@@ -101,7 +101,7 @@ async function devReviewer(cookies: Cookies, db: Db): Promise<Reviewer | null> {
 	const user = await db
 		.selectFrom('github_users')
 		.select(['id', 'login'])
-		.where('id', '=', Number(env.DEV_REVIEWER_ID))
+		.where('id', '=', Number(DEV_REVIEWER_ID))
 		.executeTakeFirst();
 	if (!user) {
 		return null;

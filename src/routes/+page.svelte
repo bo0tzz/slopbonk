@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { Badge, Button, Heading, Stack, Text } from '@immich/ui';
-	import { onReviewChange } from '$lib/review-changes.svelte';
+	import { onReviewChange } from '#lib/review-changes.svelte.js';
 	import { currentReviewer, reviewableOrgs } from './session.remote';
 
 	const [reviewer, { orgs, installUrl }] = $derived(
@@ -20,7 +20,7 @@
 			Finds accounts that farm comments across many repositories, and puts them in front of your
 			organisation's maintainers for review.
 		</Text>
-		<div><Button href={resolve('/auth/login')}>Sign in with GitHub</Button></div>
+		<div><Button href={resolve('auth/login')}>Sign in with GitHub</Button></div>
 	</Stack>
 {:else}
 	<Stack gap={4}>

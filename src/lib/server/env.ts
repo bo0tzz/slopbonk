@@ -1,29 +1,22 @@
-import { env } from '$env/dynamic/private';
+import {
+	GITHUB_APP_ID,
+	GITHUB_APP_SLUG,
+	GITHUB_CLIENT_ID,
+	GITHUB_CLIENT_SECRET,
+	GITHUB_PRIVATE_KEY,
+	GITHUB_WEBHOOK_SECRET,
+	OPERATOR_GITHUB_IDS,
+	ORIGIN
+} from '$app/env/private';
 
-function required(name: string): string {
-	const value = env[name];
-	if (!value) {
-		throw new Error(`Missing required environment variable ${name}`);
-	}
-	return value;
-}
-
-export function databaseUrl(): string {
-	return required('DATABASE_URL');
-}
-
-/**
- * Public URL of this instance, without trailing slash; GitHub redirects reviewers back to it. The
- * same variable tells adapter-node which origin requests arrive on.
- */
+/** Public URL of this instance, without trailing slash; GitHub redirects reviewers back to it. */
 export function baseUrl(): string {
-	return required('ORIGIN').replace(/\/$/, '');
+	return ORIGIN.replace(/\/$/, '');
 }
 
 /** GitHub user ids of the people who run this instance; they can open the admin panel. */
 export function operatorIds(): number[] {
-	return (env.OPERATOR_GITHUB_IDS ?? '')
-		.split(',')
+	return OPERATOR_GITHUB_IDS.split(',')
 		.map((id) => Number(id.trim()))
 		.filter((id) => Number.isInteger(id) && id > 0);
 }
@@ -39,12 +32,12 @@ export interface GithubAppConfig {
 
 export function githubApp(): GithubAppConfig {
 	return {
-		appId: Number(required('GITHUB_APP_ID')),
-		slug: required('GITHUB_APP_SLUG'),
-		clientId: required('GITHUB_CLIENT_ID'),
-		clientSecret: required('GITHUB_CLIENT_SECRET'),
-		webhookSecret: required('GITHUB_WEBHOOK_SECRET'),
+		appId: Number(GITHUB_APP_ID),
+		slug: GITHUB_APP_SLUG,
+		clientId: GITHUB_CLIENT_ID,
+		clientSecret: GITHUB_CLIENT_SECRET,
+		webhookSecret: GITHUB_WEBHOOK_SECRET,
 		// .env files hold the PEM on one line with escaped newlines.
-		privateKey: required('GITHUB_PRIVATE_KEY').replaceAll('\\n', '\n')
+		privateKey: GITHUB_PRIVATE_KEY.replaceAll('\\n', '\n')
 	};
 }

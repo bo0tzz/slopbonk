@@ -1,6 +1,6 @@
 import { sql } from 'kysely';
 import type { RequestHandler } from './$types';
-import { getServices } from '$lib/server/services';
+import { getServices } from '#lib/server/services.js';
 
 export const GET: RequestHandler = async () => {
 	try {

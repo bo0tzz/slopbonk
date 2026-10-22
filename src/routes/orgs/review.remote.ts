@@ -1,12 +1,12 @@
 import { error, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { form, getRequestEvent, query } from '$app/server';
-import { installationForReviewer } from '$lib/server/auth/access';
-import { accountEvidence } from '$lib/server/review/account';
-import { MAX_SCORE } from '$lib/server/review/stats';
-import { DecisionError, recordDecision } from '$lib/server/review/decisions';
-import { listQueue, nextToReview, queueCounts } from '$lib/server/review/queue';
-import { getServices } from '$lib/server/services';
+import { installationForReviewer } from '#lib/server/auth/access.js';
+import { accountEvidence } from '#lib/server/review/account.js';
+import { MAX_SCORE } from '#lib/server/review/stats.js';
+import { DecisionError, recordDecision } from '#lib/server/review/decisions.js';
+import { listQueue, nextToReview, queueCounts } from '#lib/server/review/queue.js';
+import { getServices } from '#lib/server/services.js';
 
 async function installation(org: string) {
 	const { locals } = getRequestEvent();

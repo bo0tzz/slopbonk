@@ -2,12 +2,12 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { Badge, Button, Heading, Stack, Text } from '@immich/ui';
-	import ActivityChart from '$lib/components/ActivityChart.svelte';
-	import ExternalLink from '$lib/components/ExternalLink.svelte';
-	import Panel from '$lib/components/Panel.svelte';
-	import StatTile from '$lib/components/StatTile.svelte';
+	import ActivityChart from '#lib/components/ActivityChart.svelte';
+	import ExternalLink from '#lib/components/ExternalLink.svelte';
+	import Panel from '#lib/components/Panel.svelte';
+	import StatTile from '#lib/components/StatTile.svelte';
 	import DecisionButtons from '../../../DecisionButtons.svelte';
-	import { onReviewChange } from '$lib/review-changes.svelte';
+	import { onReviewChange } from '#lib/review-changes.svelte.js';
 	import { flaggedAccount } from '../../../review.remote';
 
 	const account = $derived(

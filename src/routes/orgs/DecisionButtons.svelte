@@ -22,19 +22,19 @@
 
 <HStack>
 	<form {...dismissForm}>
-		<input type="hidden" name="org" value={org} />
-		<input type="hidden" name="caseId" value={caseId} />
-		<input type="hidden" name="action" value="dismiss" />
-		<input type="hidden" name="then" value={then} />
+		<input {...dismissForm.fields.org.as('hidden', org)} />
+		<input {...dismissForm.fields.caseId.as('hidden', String(caseId))} />
+		<input {...dismissForm.fields.action.as('hidden', 'dismiss')} />
+		<input {...dismissForm.fields.then.as('hidden', then)} />
 		<Button type="submit" {size} variant="outline" color="secondary">Dismiss</Button>
 	</form>
 	{#if canBlock}
 		<form {...blockForm} bind:this={blockElement}>
-			<input type="hidden" name="org" value={org} />
-			<input type="hidden" name="caseId" value={caseId} />
-			<input type="hidden" name="action" value="block" />
-			<input type="hidden" name="hideComments" value={hideComments ? 'yes' : 'no'} />
-			<input type="hidden" name="then" value={then} />
+			<input {...blockForm.fields.org.as('hidden', org)} />
+			<input {...blockForm.fields.caseId.as('hidden', String(caseId))} />
+			<input {...blockForm.fields.action.as('hidden', 'block')} />
+			<input {...blockForm.fields.hideComments.as('hidden', hideComments ? 'yes' : 'no')} />
+			<input {...blockForm.fields.then.as('hidden', then)} />
 			<Button type="button" {size} color="danger" onclick={() => (confirming = true)}>Block</Button>
 		</form>
 	{/if}

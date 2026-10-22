@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { resolve } from '$app/paths';
-	import { env } from '$env/dynamic/public';
+	import { PUBLIC_CONTACT_EMAIL } from '$app/env/public';
 	import { mdiGithub } from '@mdi/js';
 	import {
 		Button,
@@ -36,10 +36,10 @@
 				<HStack>
 					{#if reviewer}
 						{#if reviewer.operator}
-							<a href={resolve('/admin')} class="text-sm text-primary hover:underline">Admin</a>
+							<a href={resolve('admin')} class="text-sm text-primary hover:underline">Admin</a>
 						{/if}
 						<Text size="small">{reviewer.login}</Text>
-						<form method="POST" action={resolve('/auth/logout')}>
+						<form method="POST" action={resolve('auth/logout')}>
 							<Button type="submit" size="small" variant="ghost">Sign out</Button>
 						</form>
 					{/if}
@@ -62,13 +62,11 @@
 			{@render children()}
 		</main>
 
-		{#if env.PUBLIC_CONTACT_EMAIL}
+		{#if PUBLIC_CONTACT_EMAIL}
 			<footer class="border-t border-light-300 py-4">
 				<Text size="small" color="muted" class="mx-auto max-w-5xl px-6">
 					To ask about or remove data about your GitHub account, email
-					<a href="mailto:{env.PUBLIC_CONTACT_EMAIL}" class="underline"
-						>{env.PUBLIC_CONTACT_EMAIL}</a
-					>.
+					<a href="mailto:{PUBLIC_CONTACT_EMAIL}" class="underline">{PUBLIC_CONTACT_EMAIL}</a>.
 				</Text>
 			</footer>
 		{/if}

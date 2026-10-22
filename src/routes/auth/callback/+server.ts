@@ -1,8 +1,8 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { recordReviewer, saveTokens } from '$lib/server/auth/session';
-import { baseUrl } from '$lib/server/env';
-import { getServices } from '$lib/server/services';
+import { recordReviewer, saveTokens } from '#lib/server/auth/session.js';
+import { baseUrl } from '#lib/server/env.js';
+import { getServices } from '#lib/server/services.js';
 
 function fail(reason: string, detail?: string): never {
 	console.warn(`Sign-in failed: ${reason}${detail ? ` (${detail})` : ''}`);

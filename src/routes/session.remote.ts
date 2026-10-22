@@ -1,8 +1,8 @@
 import { getRequestEvent, query } from '$app/server';
-import { isOperator } from '$lib/server/auth/access';
-import { githubApp } from '$lib/server/env';
-import { reviewableInstallations } from '$lib/server/review/installations';
-import { getServices } from '$lib/server/services';
+import { isOperator } from '#lib/server/auth/access.js';
+import { githubApp } from '#lib/server/env.js';
+import { reviewableInstallations } from '#lib/server/review/installations.js';
+import { getServices } from '#lib/server/services.js';
 
 export const currentReviewer = query(async () => {
 	const { reviewer } = getRequestEvent().locals;

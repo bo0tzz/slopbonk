@@ -1,4 +1,4 @@
-import type { Reviewer } from '$lib/server/auth/session';
+import type { Reviewer } from '#lib/server/auth/session.js';
 
 declare global {
 	namespace App {

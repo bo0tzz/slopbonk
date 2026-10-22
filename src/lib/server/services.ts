@@ -2,7 +2,8 @@
 import { createDb, type Db } from './db';
 import { listenForReviewChanges, type ReviewChanges } from './db/changes';
 import { migrateToLatest } from './db/migrate';
-import { databaseUrl, githubApp } from './env';
+import { DATABASE_URL } from '$app/env/private';
+import { githubApp } from './env';
 import { outboxWorker } from './act/workers';
 import { requeuePending } from './act/outbox';
 import { installationActions } from './github/actions';
@@ -37,12 +38,12 @@ export async function startServices(): Promise<Services> {
 	const clientFor = (installationId: number) => installationClient(app, installationId);
 	const actionsFor = (installationId: number) => installationActions(app, installationId);
 
-	const db = createDb(databaseUrl());
+	const db = createDb(DATABASE_URL);
 	await migrateToLatest(db);
 
 	const deferUntil = (error: unknown) => (error instanceof RateLimitedError ? error.until : null);
 	const queue = await startQueue(
-		databaseUrl(),
+		DATABASE_URL,
 		queues,
 		(queue) => [
 			fetchHistoryWorker({ db, queue, clientFor }),
@@ -60,7 +61,7 @@ export async function startServices(): Promise<Services> {
 	await queue.schedule(refreshCasesQueue, '43 4 * * *', {});
 	await requeuePending(db, queue);
 
-	const reviewChanges = await listenForReviewChanges(databaseUrl());
+	const reviewChanges = await listenForReviewChanges(DATABASE_URL);
 
 	services = {
 		db,
