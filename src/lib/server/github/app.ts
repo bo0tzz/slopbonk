@@ -20,8 +20,13 @@ export function rateLimitHolds(now = Date.now()): { installationId: number; unti
 		.map(([budget, until]) => ({ installationId: Number(budget), until: new Date(until) }));
 }
 
+/**
+ * Fetches the installation token up front. Octokit would otherwise fetch it with the first request,
+ * and a removed installation's 404 would then look like that request's own.
+ */
 export async function installationOctokit(app: App, installationId: number): Promise<Octokit> {
 	const octokit = await app.getInstallationOctokit(installationId);
+	await octokit.auth({ type: 'installation' });
 	failFastOnRateLimit(octokit, String(installationId));
 	return octokit;
 }
