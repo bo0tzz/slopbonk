@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1](https://github.com/bo0tzz/slopbonk/compare/v0.5.0...v0.5.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* allow sign-in's redirects to GitHub and the configured origin ([cda2614](https://github.com/bo0tzz/slopbonk/commit/cda26144d0219af7bb12fdf6ff26efb4b4076b03))
+* keep running when the database drops idle connections ([e63e981](https://github.com/bo0tzz/slopbonk/commit/e63e981ba2c83683c774f8100cea85a7ecb18039))
+
 ## [0.5.0](https://github.com/bo0tzz/slopbonk/compare/v0.4.0...v0.5.0) (2026-10-22)
 
 
