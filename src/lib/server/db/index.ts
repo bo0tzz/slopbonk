@@ -8,7 +8,9 @@ export type Db = Kysely<DB>;
 pg.types.setTypeParser(pg.types.builtins.INT8, (value) => Number(value));
 
 export function createDb(connectionString: string): Db {
-	return new Kysely<DB>({
-		dialect: new PostgresDialect({ pool: new pg.Pool({ connectionString }) })
-	});
+	const pool = new pg.Pool({ connectionString });
+	// The server drops idle connections when it restarts or fails over. The pool replaces them, but
+	// an 'error' event nobody listens for would crash the process.
+	pool.on('error', (error) => console.error('Database connection lost', error.message));
+	return new Kysely<DB>({ dialect: new PostgresDialect({ pool }) });
 }
