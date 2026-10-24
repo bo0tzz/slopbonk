@@ -5,10 +5,10 @@ import { baseUrl } from '#lib/server/env.js';
 import { getServices } from '#lib/server/services.js';
 
 export const GET: RequestHandler = ({ cookies, url }) => {
-	// The state cookie has to live on the same host as the registered callback URL. Compare hosts
-	// only: behind a TLS-terminating proxy the request itself arrives as plain http.
-	if (url.host !== new URL(baseUrl()).host) {
-		redirect(302, `${baseUrl()}/auth/login`);
+	// The state cookie has to live on the same host as the registered callback URL.
+	const canonical = new URL(baseUrl());
+	if (url.host !== canonical.host) {
+		redirect(302, `${canonical.origin}/auth/login`, { external: [canonical.origin] });
 	}
 	const state = randomBytes(16).toString('hex');
 	cookies.set('slopbonk_oauth_state', state, {
@@ -18,5 +18,7 @@ export const GET: RequestHandler = ({ cookies, url }) => {
 		sameSite: 'lax',
 		maxAge: 600
 	});
-	redirect(302, getServices().auth.authorizationUrl(state, `${baseUrl()}/auth/callback`));
+	redirect(302, getServices().auth.authorizationUrl(state, `${baseUrl()}/auth/callback`), {
+		external: ['https://github.com']
+	});
 };
