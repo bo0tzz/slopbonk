@@ -1,4 +1,4 @@
-FROM node:26.12.0-slim@sha256:e556a144463cc8dc53afe8de6d2fa0db5c132fd39ffa232c17641bd40df2bf11 AS base
+FROM node:26.13.1-slim@sha256:abe7e5a82b61a8ef67b315b85497c9e65173387ccf2f4a029248184b8e020be5 AS base
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 RUN npm install --global "$(node -p 'require("./package.json").packageManager')"
@@ -11,7 +11,7 @@ RUN pnpm exec svelte-kit sync && pnpm exec vite build
 FROM base AS prod-deps
 RUN pnpm install --frozen-lockfile --prod
 
-FROM node:26.12.0-slim@sha256:e556a144463cc8dc53afe8de6d2fa0db5c132fd39ffa232c17641bd40df2bf11
+FROM node:26.13.1-slim@sha256:abe7e5a82b61a8ef67b315b85497c9e65173387ccf2f4a029248184b8e020be5
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=prod-deps /app/node_modules node_modules
